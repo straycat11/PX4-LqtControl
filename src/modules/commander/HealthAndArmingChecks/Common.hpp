@@ -67,6 +67,7 @@ enum class NavModes : uint32_t {
 	PositionControl = (uint32_t)navigation_mode_group_t::posctl,
 	Mission = (uint32_t)navigation_mode_group_t::mission,
 	Takeoff = (uint32_t)navigation_mode_group_t::takeoff,
+	Flip = (uint32_t)navigation_mode_group_t::flip,
 
 	All = 0xffffffff
 };

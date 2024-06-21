@@ -142,6 +142,10 @@
                         "1073741824": {
                             "name": "external8",
                             "description": "External 8"
+                        },
+                        "64": {
+                            "name": "flip",
+                            "description": "Flip"
                         }
                     }
                 },
