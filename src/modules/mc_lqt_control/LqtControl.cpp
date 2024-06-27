@@ -40,6 +40,12 @@
 #include <uORB/topics/parameter_update.h>
 #include <uORB/topics/sensor_combined.h>
 
+#include <uORB/uORB.h> // Debug
+#include <uORB/topics/debug_key_value.h> // Debug
+#include <uORB/topics/debug_value.h> // Debug
+#include <uORB/topics/debug_vect.h> // Debug
+#include <uORB/topics/debug_array.h> // Debug
+#include <string.h> // Debug
 
 int LqtControl::print_status()
 {
@@ -139,14 +145,40 @@ void LqtControl::run()
 {
 	// Example: run the loop synchronized to the sensor_combined topic publication
 	int sensor_combined_sub = orb_subscribe(ORB_ID(sensor_combined));
-
 	px4_pollfd_struct_t fds[1];
 	fds[0].fd = sensor_combined_sub;
 	fds[0].events = POLLIN;
 
+	/* advertise named debug value */
+	struct debug_key_value_s dbg_key;
+	strncpy(dbg_key.key, "velx", 10);
+	dbg_key.value = 0.0f;
+	orb_advert_t pub_dbg_key = orb_advertise(ORB_ID(debug_key_value), &dbg_key);
+
+	/* advertise indexed debug value */
+	struct debug_value_s dbg_ind;
+	dbg_ind.ind = 42;
+	dbg_ind.value = 0.5f;
+	orb_advert_t pub_dbg_ind = orb_advertise(ORB_ID(debug_value), &dbg_ind);
+
+	/* advertise debug vect */
+	struct debug_vect_s dbg_vect;
+	strncpy(dbg_vect.name, "vel3D", 10);
+	dbg_vect.x = 1.0f;
+	dbg_vect.y = 2.0f;
+	dbg_vect.z = 3.0f;
+	orb_advert_t pub_dbg_vect = orb_advertise(ORB_ID(debug_vect), &dbg_vect);
+
+	/* advertise debug array */
+	struct debug_array_s dbg_array;
+	dbg_array.id = 1;
+	strncpy(dbg_array.name, "dbg_array", 10);
+	orb_advert_t pub_dbg_array = orb_advertise(ORB_ID(debug_array), &dbg_array);
+
 	// initialize parameters
 	parameters_update(true);
 
+	int value_counter = 0;
 	while (!should_exit()) {
 
 		// wait for up to 1000ms for data
@@ -162,10 +194,43 @@ void LqtControl::run()
 			continue;
 
 		} else if (fds[0].revents & POLLIN) {
+			while(value_counter < 100) {
+				uint64_t timestamp_us = hrt_absolute_time();
+
+				/* send one named value */
+				dbg_key.value = value_counter;
+				dbg_key.timestamp = timestamp_us;
+				orb_publish(ORB_ID(debug_key_value), pub_dbg_key, &dbg_key);
+
+				/* send one indexed value */
+				dbg_ind.value = 0.5f * value_counter;
+				dbg_ind.timestamp = timestamp_us;
+				orb_publish(ORB_ID(debug_value), pub_dbg_ind, &dbg_ind);
+
+				/* send one vector */
+				dbg_vect.x = 1.0f * value_counter;
+				dbg_vect.y = 2.0f * value_counter;
+				dbg_vect.z = 3.0f * value_counter;
+				dbg_vect.timestamp = timestamp_us;
+				orb_publish(ORB_ID(debug_vect), pub_dbg_vect, &dbg_vect);
+				/* send one array */
+				for (size_t i = 0; i < debug_array_s::ARRAY_SIZE; i++) {
+					dbg_array.data[i] = value_counter + i * 0.01f;
+				}
+
+				dbg_array.timestamp = timestamp_us;
+				orb_publish(ORB_ID(debug_array), pub_dbg_array, &dbg_array);
+
+				warnx("sent one more value..");
+
+				value_counter++;
+				px4_usleep(500000);
+			}
 
 			struct sensor_combined_s sensor_combined;
 			orb_copy(ORB_ID(sensor_combined), sensor_combined_sub, &sensor_combined);
 			// TODO: do something with the data...
+
 
 		}
 
