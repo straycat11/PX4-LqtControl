@@ -33,20 +33,27 @@
 
 #pragma once
 
+#include <lib/controllib/blocks.hpp>
 #include <px4_platform_common/module.h>
 #include <px4_platform_common/module_params.h>
-#include <uORB/SubscriptionInterval.hpp>
+#include <px4_platform_common/px4_work_queue/ScheduledWorkItem.hpp>
 #include <uORB/topics/parameter_update.h>
+#include <uORB/Publication.hpp>
+#include <uORB/SubscriptionInterval.hpp>
+#include <uORB/SubscriptionCallback.hpp>
+#include <uORB/topics/vehicle_control_mode.h>
+#include <uORB/topics/vehicle_local_position.h>
+#include <uORB/topics/vehicle_local_position_setpoint.h>
 
 using namespace time_literals;
 
 extern "C" __EXPORT int mc_lqt_control_main(int argc, char *argv[]);
 
 
-class LqtControl : public ModuleBase<LqtControl>, public ModuleParams
+class LqtControl : public ModuleBase<LqtControl>,public control::SuperBlock, public ModuleParams, public px4::ScheduledWorkItem
 {
 public:
-	LqtControl(int example_param, bool example_flag);
+	LqtControl();
 
 	virtual ~LqtControl() = default;
 
@@ -54,21 +61,14 @@ public:
 	static int task_spawn(int argc, char *argv[]);
 
 	/** @see ModuleBase */
-	static LqtControl *instantiate(int argc, char *argv[]);
-
-	/** @see ModuleBase */
 	static int custom_command(int argc, char *argv[]);
 
 	/** @see ModuleBase */
 	static int print_usage(const char *reason = nullptr);
 
-	/** @see ModuleBase::run() */
-	void run() override;
-
-	/** @see ModuleBase::print_status() */
-	int print_status() override;
-
+	bool init();
 private:
+	void Run() override;
 
 	/**
 	 * Check for parameter changes and update them if needed.
@@ -76,7 +76,14 @@ private:
 	 * @param force for a parameter update
 	 */
 	void parameters_update(bool force = false);
+	uORB::Publication<vehicle_local_position_setpoint_s> _local_pos_sp_pub{ORB_ID(vehicle_local_position_setpoint)};	/**< vehicle local position setpoint publication */
+	uORB::SubscriptionCallbackWorkItem _local_pos_sub{this, ORB_ID(vehicle_local_position)};	/**< vehicle local position */
+	uORB::Subscription _vehicle_control_mode_sub{ORB_ID(vehicle_control_mode)};
 
+	hrt_abstime _time_stamp_last_loop{0};		/**< time stamp of last loop iteration */
+	hrt_abstime _time_position_control_enabled{0};
+
+	vehicle_control_mode_s _vehicle_control_mode{};
 
 	DEFINE_PARAMETERS(
 		(ParamInt<px4::params::SYS_AUTOSTART>) _param_sys_autostart,   /**< example parameter */

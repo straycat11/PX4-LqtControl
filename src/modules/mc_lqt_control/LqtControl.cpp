@@ -33,28 +33,6 @@
 
 #include "LqtControl.h"
 
-#include <px4_platform_common/getopt.h>
-#include <px4_platform_common/log.h>
-#include <px4_platform_common/posix.h>
-
-#include <uORB/topics/parameter_update.h>
-#include <uORB/topics/sensor_combined.h>
-
-#include <uORB/uORB.h> // Debug
-#include <uORB/topics/debug_key_value.h> // Debug
-#include <uORB/topics/debug_value.h> // Debug
-#include <uORB/topics/debug_vect.h> // Debug
-#include <uORB/topics/debug_array.h> // Debug
-#include <string.h> // Debug
-
-int LqtControl::print_status()
-{
-	PX4_INFO("Running");
-	// TODO: print additional runtime information about the state of the module
-
-	return 0;
-}
-
 int LqtControl::custom_command(int argc, char *argv[])
 {
 	/*
@@ -76,168 +54,84 @@ int LqtControl::custom_command(int argc, char *argv[])
 
 int LqtControl::task_spawn(int argc, char *argv[])
 {
-	_task_id = px4_task_spawn_cmd("module",
-				      SCHED_DEFAULT,
-				      SCHED_PRIORITY_DEFAULT,
-				      1024,
-				      (px4_main_t)&run_trampoline,
-				      (char *const *)argv);
+	LqtControl *instance = new LqtControl();
 
-	if (_task_id < 0) {
-		_task_id = -1;
-		return -errno;
-	}
+	if (instance) {
+		_object.store(instance);
+		_task_id = task_id_is_work_queue;
 
-	return 0;
-}
-
-LqtControl *LqtControl::instantiate(int argc, char *argv[])
-{
-	int example_param = 0;
-	bool example_flag = false;
-	bool error_flag = false;
-
-	int myoptind = 1;
-	int ch;
-	const char *myoptarg = nullptr;
-
-	// parse CLI arguments
-	while ((ch = px4_getopt(argc, argv, "p:f", &myoptind, &myoptarg)) != EOF) {
-		switch (ch) {
-		case 'p':
-			example_param = (int)strtol(myoptarg, nullptr, 10);
-			break;
-
-		case 'f':
-			example_flag = true;
-			break;
-
-		case '?':
-			error_flag = true;
-			break;
-
-		default:
-			PX4_WARN("unrecognized flag");
-			error_flag = true;
-			break;
+		if (instance->init()) {
+			return PX4_OK;
 		}
-	}
 
-	if (error_flag) {
-		return nullptr;
-	}
-
-	LqtControl *instance = new LqtControl(example_param, example_flag);
-
-	if (instance == nullptr) {
+	} else {
 		PX4_ERR("alloc failed");
 	}
 
-	return instance;
+	delete instance;
+	_object.store(nullptr);
+	_task_id = -1;
+
+	return PX4_ERROR;
 }
 
-LqtControl::LqtControl(int example_param, bool example_flag)
-	: ModuleParams(nullptr)
+LqtControl::LqtControl() :
+	SuperBlock(nullptr, "MLC"),ModuleParams(nullptr),
+	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::nav_and_controllers)
 {
-}
-
-void LqtControl::run()
-{
-	// Example: run the loop synchronized to the sensor_combined topic publication
-	int sensor_combined_sub = orb_subscribe(ORB_ID(sensor_combined));
-	px4_pollfd_struct_t fds[1];
-	fds[0].fd = sensor_combined_sub;
-	fds[0].events = POLLIN;
-
-	/* advertise named debug value */
-	struct debug_key_value_s dbg_key;
-	strncpy(dbg_key.key, "velx", 10);
-	dbg_key.value = 0.0f;
-	orb_advert_t pub_dbg_key = orb_advertise(ORB_ID(debug_key_value), &dbg_key);
-
-	/* advertise indexed debug value */
-	struct debug_value_s dbg_ind;
-	dbg_ind.ind = 42;
-	dbg_ind.value = 0.5f;
-	orb_advert_t pub_dbg_ind = orb_advertise(ORB_ID(debug_value), &dbg_ind);
-
-	/* advertise debug vect */
-	struct debug_vect_s dbg_vect;
-	strncpy(dbg_vect.name, "vel3D", 10);
-	dbg_vect.x = 1.0f;
-	dbg_vect.y = 2.0f;
-	dbg_vect.z = 3.0f;
-	orb_advert_t pub_dbg_vect = orb_advertise(ORB_ID(debug_vect), &dbg_vect);
-
-	/* advertise debug array */
-	struct debug_array_s dbg_array;
-	dbg_array.id = 1;
-	strncpy(dbg_array.name, "dbg_array", 10);
-	orb_advert_t pub_dbg_array = orb_advertise(ORB_ID(debug_array), &dbg_array);
-
-	// initialize parameters
 	parameters_update(true);
-
-	int value_counter = 0;
-	while (!should_exit()) {
-
-		// wait for up to 1000ms for data
-		int pret = px4_poll(fds, (sizeof(fds) / sizeof(fds[0])), 1000);
-
-		if (pret == 0) {
-			// Timeout: let the loop run anyway, don't do `continue` here
-
-		} else if (pret < 0) {
-			// this is undesirable but not much we can do
-			PX4_ERR("poll error %d, %d", pret, errno);
-			px4_usleep(50000);
-			continue;
-
-		} else if (fds[0].revents & POLLIN) {
-			while(value_counter < 100) {
-				uint64_t timestamp_us = hrt_absolute_time();
-
-				/* send one named value */
-				dbg_key.value = value_counter;
-				dbg_key.timestamp = timestamp_us;
-				orb_publish(ORB_ID(debug_key_value), pub_dbg_key, &dbg_key);
-
-				/* send one indexed value */
-				dbg_ind.value = 0.5f * value_counter;
-				dbg_ind.timestamp = timestamp_us;
-				orb_publish(ORB_ID(debug_value), pub_dbg_ind, &dbg_ind);
-
-				/* send one vector */
-				dbg_vect.x = 1.0f * value_counter;
-				dbg_vect.y = 2.0f * value_counter;
-				dbg_vect.z = 3.0f * value_counter;
-				dbg_vect.timestamp = timestamp_us;
-				orb_publish(ORB_ID(debug_vect), pub_dbg_vect, &dbg_vect);
-				/* send one array */
-				for (size_t i = 0; i < debug_array_s::ARRAY_SIZE; i++) {
-					dbg_array.data[i] = value_counter + i * 0.01f;
-				}
-
-				dbg_array.timestamp = timestamp_us;
-				orb_publish(ORB_ID(debug_array), pub_dbg_array, &dbg_array);
-
-				warnx("sent one more value..");
-
-				value_counter++;
-				px4_usleep(500000);
-			}
-
-			struct sensor_combined_s sensor_combined;
-			orb_copy(ORB_ID(sensor_combined), sensor_combined_sub, &sensor_combined);
-			// TODO: do something with the data...
-
-
-		}
-
-		parameters_update();
+}
+bool LqtControl::init()
+{
+	if (!_local_pos_sub.registerCallback()) {
+		PX4_ERR("callback registration failed");
+		return false;
 	}
 
-	orb_unsubscribe(sensor_combined_sub);
+	_time_stamp_last_loop = hrt_absolute_time();
+	ScheduleNow();
+
+	return true;
+}
+
+
+void LqtControl::Run()
+{
+	if (should_exit()) {
+		_local_pos_sub.unregisterCallback();
+		exit_and_cleanup();
+		return;
+	}
+
+	// reschedule backup
+	ScheduleDelayed(100_ms);
+
+	parameters_update(false);
+
+	vehicle_local_position_s vehicle_local_position;
+
+	if (_local_pos_sub.update(&vehicle_local_position)) {
+		const float dt =
+			math::constrain(((vehicle_local_position.timestamp_sample - _time_stamp_last_loop) * 1e-6f), 0.002f, 0.04f);
+		_time_stamp_last_loop = vehicle_local_position.timestamp_sample;
+
+		// set _dt in controllib Block for BlockDerivative
+		setDt(dt);
+
+		if (_vehicle_control_mode_sub.updated()) {
+			const bool previous_position_control_enabled = _vehicle_control_mode.flag_multicopter_position_control_enabled;
+
+			if (_vehicle_control_mode_sub.update(&_vehicle_control_mode)) {
+				if (!previous_position_control_enabled && _vehicle_control_mode.flag_multicopter_position_control_enabled) {
+					_time_position_control_enabled = _vehicle_control_mode.timestamp;
+
+				} else if (previous_position_control_enabled && !_vehicle_control_mode.flag_multicopter_position_control_enabled) {
+					// clear existing setpoint when controller is no longer active
+					// _setpoint = PositionControl::empty_trajectory_setpoint;
+				}
+			}
+		}
+	}
 }
 
 void LqtControl::parameters_update(bool force)
@@ -249,7 +143,7 @@ void LqtControl::parameters_update(bool force)
 		_parameter_update_sub.copy(&update);
 
 		// update parameters from storage
-		updateParams();
+		ModuleParams::updateParams();
 	}
 }
 
