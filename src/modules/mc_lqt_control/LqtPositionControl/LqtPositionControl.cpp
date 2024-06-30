@@ -30,6 +30,22 @@ void LqtPositionControl::setInputSetpoint(const trajectory_setpoint_s &setpoint)
 	_yawspeed_sp = setpoint.yawspeed;
 }
 
+bool LqtPositionControl::update(const float dt)
+{
+	bool valid = _inputValid();
+
+	if (valid) {
+		_positionControl();
+		_velocityControl(dt);
+
+		_yawspeed_sp = PX4_ISFINITE(_yawspeed_sp) ? _yawspeed_sp : 0.f;
+		_yaw_sp = PX4_ISFINITE(_yaw_sp) ? _yaw_sp : _yaw; // TODO: better way to disable yaw control
+	}
+
+	// There has to be a valid output acceleration and thrust setpoint otherwise something went wrong
+	return valid && _acc_sp.isAllFinite() && _thr_sp.isAllFinite();
+}
+
 void LqtPositionControl::_positionControl()
 {
 	// P-position controller
