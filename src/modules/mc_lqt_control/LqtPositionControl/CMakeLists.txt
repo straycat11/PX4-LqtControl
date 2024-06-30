@@ -1,6 +1,6 @@
 ############################################################################
 #
-#   Copyright (c) 2018 PX4 Development Team. All rights reserved.
+#   Copyright (c) 2019 PX4 Development Team. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -31,17 +31,10 @@
 #
 ############################################################################
 
-add_subdirectory(LqtPositionControl)
-px4_add_module(
-	MODULE modules__mc_lqt_control
-	MAIN mc_lqt_control
-	COMPILE_FLAGS
-	SRCS
-		LqtControl.cpp
-		LqtControl.h
-		DEPENDS
-			LqtPositionControl
-			controllib
-			geo
-	)
-
+px4_add_library(LqtPositionControl
+	ControlMath.cpp
+	ControlMath.hpp
+	LqtPositionControl.cpp
+	LqtPositionControl.hpp
+)
+target_include_directories(LqtPositionControl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
