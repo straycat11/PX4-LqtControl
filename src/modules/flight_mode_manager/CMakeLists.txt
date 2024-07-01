@@ -49,6 +49,7 @@ list(APPEND flight_tasks_all
 	ManualPosition
 	ManualPositionSmoothVel
 	Transition
+	Lqt
 )
 
 if(NOT px4_constrained_flash_build)

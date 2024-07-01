@@ -233,6 +233,13 @@ void FlightModeManager::start_flight_task()
 		matching_task_running = matching_task_running && !task_failure;
 	}
 
+	// Lqt position control
+	if (_vehicle_status_sub.get().nav_state == vehicle_status_s::NAVIGATION_STATE_LQT) {
+		found_some_task = true;
+		FlightTaskError error = switchTask(FlightTaskIndex::Lqt);
+		task_failure = error != FlightTaskError::NoError;
+	}
+
 	// Manual altitude control
 	if ((_vehicle_status_sub.get().nav_state == vehicle_status_s::NAVIGATION_STATE_ALTCTL) || task_failure) {
 		found_some_task = true;
