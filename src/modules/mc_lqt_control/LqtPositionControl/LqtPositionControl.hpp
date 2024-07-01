@@ -40,6 +40,46 @@ public:
 	void setVelocityGains(const matrix::Vector3f &P, const matrix::Vector3f &I, const matrix::Vector3f &D);
 
 	/**
+	 * Set the minimum and maximum collective normalized thrust [0,1] that can be output by the controller
+	 * @param min minimum thrust e.g. 0.1 or 0
+	 * @param max maximum thrust e.g. 0.9 or 1
+	 */
+	void setThrustLimits(const float min, const float max);
+
+	/**
+	 * Set margin that is kept for horizontal control when prioritizing vertical thrust
+	 * @param margin of normalized thrust that is kept for horizontal control e.g. 0.3
+	 */
+	void setHorizontalThrustMargin(const float margin);
+
+	/**
+	 * Set the maximum tilt angle in radians the output attitude is allowed to have
+	 * @param tilt angle in radians from level orientation
+	 */
+	void setTiltLimit(const float tilt) { _lim_tilt = tilt; }
+
+	/**
+	 * Set the normalized hover thrust
+	 * @param hover_thrust [HOVER_THRUST_MIN, HOVER_THRUST_MAX] with which the vehicle hovers not accelerating down or up with level orientation
+	 */
+	void setHoverThrust(const float hover_thrust) { _hover_thrust = math::constrain(hover_thrust, HOVER_THRUST_MIN, HOVER_THRUST_MAX); }
+
+	/**
+	 * Update the hover thrust without immediately affecting the output
+	 * by adjusting the integrator. This prevents propagating the dynamics
+	 * of the hover thrust signal directly to the output of the controller.
+	 */
+	void updateHoverThrust(const float hover_thrust_new);
+
+	/**
+	 * Set the maximum velocity to execute with feed forward and position control
+	 * @param vel_horizontal horizontal velocity limit
+	 * @param vel_up upwards velocity limit
+	 * @param vel_down downwards velocity limit
+	 */
+	void setVelocityLimits(const float vel_horizontal, const float vel_up, float vel_down);
+
+	/**
 	 * Pass the current vehicle state to the controller
 	 * @param PositionControlStates structure
 	 */
@@ -64,6 +104,18 @@ public:
 	bool update(const float dt);
 
 	/**
+	 * Set the integral term in xy to 0.
+	 * @see _vel_int
+	 */
+	void resetIntegral() { _vel_int.setZero(); }
+
+	/**
+	 * If set, the tilt setpoint is computed by assuming no vertical acceleration
+	 */
+	void decoupleHorizontalAndVecticalAcceleration(bool val) { _decouple_horizontal_and_vertical_acceleration = val; }
+
+
+	/**
 	 * Get the controllers output local position setpoint
 	 * These setpoints are the ones which were executed on including PID output and feed-forward.
 	 * The acceleration or thrust setpoints can be used for attitude control.
@@ -85,6 +137,9 @@ public:
 	static const trajectory_setpoint_s empty_trajectory_setpoint;
 
 private:
+	// The range limits of the hover thrust configuration/estimate
+	static constexpr float HOVER_THRUST_MIN = 0.05f;
+	static constexpr float HOVER_THRUST_MAX = 0.9f;
 
 	bool _inputValid();
 

@@ -1,6 +1,6 @@
 ############################################################################
 #
-#   Copyright (c) 2018 PX4 Development Team. All rights reserved.
+#   Copyright (c) 2023 PX4 Development Team. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -31,23 +31,8 @@
 #
 ############################################################################
 
-add_subdirectory(LqtGotoControl)
-add_subdirectory(LqtPositionControl)
-add_subdirectory(LqtTakeoff)
-
-px4_add_module(
-	MODULE modules__mc_lqt_control
-	MAIN mc_lqt_control
-	COMPILE_FLAGS
-	SRCS
-		LqtControl.cpp
-		LqtControl.h
-	DEPENDS
-		LqtGotoControl
-		LqtPositionControl
-		LqtTakeoff
-		controllib
-		geo
-		SlewRate
-	)
-
+px4_add_library(LqtGotoControl
+	LqtGotoControl.cpp
+	LqtGotoControl.hpp
+)
+target_include_directories(LqtGotoControl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
