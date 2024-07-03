@@ -42,7 +42,7 @@
 using namespace matrix;
 
 LqtControl::LqtControl() :
-	SuperBlock(nullptr, "MLC"),ModuleParams(nullptr),
+	SuperBlock(nullptr, "MPC"),ModuleParams(nullptr),
 	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::nav_and_controllers),
 	_vehicle_attitude_setpoint_pub(ORB_ID(vehicle_attitude_setpoint)),
 	_vel_x_deriv(this, "VELD"),

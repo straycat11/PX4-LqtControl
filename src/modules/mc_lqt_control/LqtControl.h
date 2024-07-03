@@ -37,19 +37,26 @@
 #include "LqtTakeoff/LqtTakeoff.hpp"
 #include "LqtGotoControl/LqtGotoControl.hpp"
 
+#include <drivers/drv_hrt.h>
 #include <lib/controllib/blocks.hpp>
+#include <lib/perf/perf_counter.h>
 #include <lib/slew_rate/SlewRateYaw.hpp>
 #include <lib/systemlib/mavlink_log.h>
+#include <px4_platform_common/px4_config.h>
 #include <px4_platform_common/defines.h>
 #include <px4_platform_common/module.h>
 #include <px4_platform_common/module_params.h>
 #include <px4_platform_common/px4_work_queue/ScheduledWorkItem.hpp>
-#include <uORB/topics/parameter_update.h>
+#include <px4_platform_common/posix.h>
+#include <px4_platform_common/tasks.h>
 #include <uORB/Publication.hpp>
+#include <uORB/Subscription.hpp>
 #include <uORB/SubscriptionCallback.hpp>
 #include <uORB/topics/hover_thrust_estimate.h>
+#include <uORB/topics/parameter_update.h>
 #include <uORB/topics/trajectory_setpoint.h>
 #include <uORB/topics/vehicle_attitude_setpoint.h>
+#include <uORB/topics/vehicle_constraints.h>
 #include <uORB/topics/vehicle_control_mode.h>
 #include <uORB/topics/vehicle_land_detected.h>
 #include <uORB/topics/vehicle_local_position.h>
@@ -109,6 +116,8 @@ private:
 	uORB::Publication<vehicle_attitude_setpoint_s>	     _vehicle_attitude_setpoint_pub{ORB_ID(vehicle_attitude_setpoint)};
 	uORB::Publication<vehicle_local_position_setpoint_s> _local_pos_sp_pub{ORB_ID(vehicle_local_position_setpoint)};	/**< vehicle local position setpoint publication */
 	uORB::SubscriptionCallbackWorkItem _local_pos_sub{this, ORB_ID(vehicle_local_position)};	/**< vehicle local position */
+
+	uORB::SubscriptionInterval _parameter_update_sub{ORB_ID(parameter_update), 1_s};
 
 	uORB::Subscription _hover_thrust_estimate_sub{ORB_ID(hover_thrust_estimate)};
 	uORB::Subscription _trajectory_setpoint_sub{ORB_ID(trajectory_setpoint)};
@@ -195,9 +204,6 @@ private:
 		(ParamFloat<px4::params::MPC_YAWRAUTO_ACC>) _param_mpc_yawrauto_acc
 	);
 
-	// Subscriptions
-	uORB::SubscriptionInterval _parameter_update_sub{ORB_ID(parameter_update), 1_s};
-
 	control::BlockDerivative _vel_x_deriv; /**< velocity derivative in x */
 	control::BlockDerivative _vel_y_deriv; /**< velocity derivative in y */
 	control::BlockDerivative _vel_z_deriv; /**< velocity derivative in z */
@@ -208,6 +214,12 @@ private:
 	hrt_abstime _last_warn{0}; /**< timer when the last warn message was sent out */
 
 	bool _hover_thrust_initialized{false};
+
+	/** Timeout in us for trajectory data to get considered invalid */
+	static constexpr uint64_t TRAJECTORY_STREAM_TIMEOUT_US = 500_ms;
+
+	/** During smooth-takeoff, below ALTITUDE_THRESHOLD the yaw-control is turned off and tilt is limited */
+	static constexpr float ALTITUDE_THRESHOLD = 0.3f;
 
 	static constexpr float MAX_SAFE_TILT_DEG = 89.f; // Numerical issues above this value due to tanf
 
