@@ -64,7 +64,6 @@
 
 using namespace time_literals;
 
-extern "C" __EXPORT int mc_lqt_control_main(int argc, char *argv[]);
 
 
 class LqtControl : public ModuleBase<LqtControl>,public control::SuperBlock, public ModuleParams, public px4::ScheduledWorkItem
