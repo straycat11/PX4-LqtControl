@@ -7,8 +7,12 @@
 
 #include <lib/mathlib/mathlib.h>
 #include <matrix/matrix/math.hpp>
+#include <matrix/matrix/Dcm.hpp>
+#include <matrix/matrix/Euler.hpp>
+#include <uORB/Subscription.hpp>
 #include <uORB/topics/trajectory_setpoint.h>
 #include <uORB/topics/vehicle_attitude_setpoint.h>
+#include <uORB/topics/vehicle_attitude.h>
 #include <uORB/topics/vehicle_local_position_setpoint.h>
 
 struct PositionControlStates {
@@ -145,7 +149,7 @@ private:
 
 	void _positionControl(); ///< Position proportional control
 	void _velocityControl(const float dt); ///< Velocity PID control
-	void _accelerationControl(); ///< Acceleration setpoint processing
+	void _toGoAccelerationControl(); ///< Acceleration setpoint processing
 
 	// Gains
 	matrix::Vector3f _gain_pos_p; ///< Position control proportional gain

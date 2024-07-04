@@ -109,7 +109,7 @@ void LqtPositionControl::_velocityControl(const float dt)
 	// No control input from setpoints or corresponding states which are NAN
 	ControlMath::addIfNotNanVector3f(_acc_sp, acc_sp_velocity);
 
-	_accelerationControl();
+	_toGoAccelerationControl();
 
 	// Integrator anti-windup in vertical direction
 	if ((_thr_sp(2) >= -_lim_thr_min && vel_error(2) >= 0.f) ||
@@ -162,9 +162,20 @@ void LqtPositionControl::_velocityControl(const float dt)
 }
 
 
-void LqtPositionControl::_accelerationControl()
+void LqtPositionControl::_toGoAccelerationControl()
 {
 	// Assume standard acceleration due to gravity in vertical direction for attitude generation
+
+	vehicle_attitude_s v_att;
+	Dcmf ned2body = Dcm<float>(v_att.q);
+	Vector3f acc_sp_body = ned2body * _acc_sp;
+	float s_4 = sqrtf(0.5 * (1.0 - acc_sp_body(2)));
+	Vector3f s_first_three_elements = (Vector3f(0, 0, 1).cross(acc_sp_body))/(2.0*s_4);
+	Quatf s = Quatf(s_first_three_elements(0),s_first_three_elements(1),s_first_three_elements(2),s_4);
+
+	float delta_yaw = _yaw_sp - Eulerf(Quatf(v_att.q)).psi();
+	Vector3f y_first_three_elements = (Vector3f(0,0,1)*sinf(delta_yaw/2.0));
+
 	float z_specific_force = -CONSTANTS_ONE_G;
 
 	if (!_decouple_horizontal_and_vertical_acceleration) {
