@@ -54,6 +54,7 @@ void LqtPositionControl::setState(const PositionControlStates &states)
 	_vel = states.velocity;
 	_yaw = states.yaw;
 	_vel_dot = states.acceleration;
+	_q = states.q;
 }
 
 void LqtPositionControl::setInputSetpoint(const trajectory_setpoint_s &setpoint)
@@ -166,15 +167,18 @@ void LqtPositionControl::_toGoAccelerationControl()
 {
 	// Assume standard acceleration due to gravity in vertical direction for attitude generation
 
-	vehicle_attitude_s v_att;
-	Dcmf ned2body = Dcm<float>(v_att.q);
+	Dcmf ned2body = Dcm<float>(_q);
 	Vector3f acc_sp_body = ned2body * _acc_sp;
-	float s_4 = sqrtf(0.5 * (1.0 - acc_sp_body(2)));
-	Vector3f s_first_three_elements = (Vector3f(0, 0, 1).cross(acc_sp_body))/(2.0*s_4);
+	float s_4 = sqrtf(0.5f * (1.f - acc_sp_body(2)));
+	Vector3f s_first_three_elements = (Vector3f(0, 0, 1).cross(acc_sp_body))/(2.f*s_4);
 	Quatf s = Quatf(s_first_three_elements(0),s_first_three_elements(1),s_first_three_elements(2),s_4);
 
-	float delta_yaw = _yaw_sp - Eulerf(Quatf(v_att.q)).psi();
-	Vector3f y_first_three_elements = (Vector3f(0,0,1)*sinf(delta_yaw/2.0));
+	_debug_s = s;
+	float delta_yaw = _yaw_sp - Eulerf(_q).psi();
+	Vector3f y_first_three_elements = (Vector3f(0,0,1)*sinf(delta_yaw/2.f));
+	float y_4 = cosf(delta_yaw/2.f);
+
+	_toGoQuaternion = s * Quatf(y_first_three_elements(0),y_first_three_elements(1),y_first_three_elements(2),y_4);
 
 	float z_specific_force = -CONSTANTS_ONE_G;
 
@@ -239,4 +243,9 @@ void LqtPositionControl::getAttitudeSetpoint(vehicle_attitude_setpoint_s &attitu
 {
 	ControlMath::thrustToAttitude(_thr_sp, _yaw_sp, attitude_setpoint);
 	attitude_setpoint.yaw_sp_move_rate = _yawspeed_sp;
+}
+
+void LqtPositionControl::getDebug(DebugVars &debug) const
+{
+	debug.s = _debug_s;
 }

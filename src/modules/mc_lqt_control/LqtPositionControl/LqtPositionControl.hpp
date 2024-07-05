@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include <drivers/drv_hrt.h>
 #include <lib/mathlib/mathlib.h>
 #include <matrix/matrix/math.hpp>
 #include <matrix/matrix/Dcm.hpp>
@@ -12,14 +13,19 @@
 #include <uORB/Subscription.hpp>
 #include <uORB/topics/trajectory_setpoint.h>
 #include <uORB/topics/vehicle_attitude_setpoint.h>
-#include <uORB/topics/vehicle_attitude.h>
 #include <uORB/topics/vehicle_local_position_setpoint.h>
+#include <uORB/topics/debug_array.h> // Debug
 
 struct PositionControlStates {
 	matrix::Vector3f position;
 	matrix::Vector3f velocity;
 	matrix::Vector3f acceleration;
 	float yaw;
+	matrix::Quatf q;
+};
+
+struct DebugVars {
+	matrix::Quatf s;
 };
 
 class LqtPositionControl
@@ -136,9 +142,21 @@ public:
 	void getAttitudeSetpoint(vehicle_attitude_setpoint_s &attitude_setpoint) const;
 
 	/**
+	 * Get debug
+	 * @param debug debug struct to fill up
+	 */
+	void getDebug(DebugVars &debug) const;
+
+	/**
 	 * All setpoints are set to NAN (uncontrolled). Timestampt zero.
 	 */
 	static const trajectory_setpoint_s empty_trajectory_setpoint;
+
+
+	/**
+	 * Get to-go quaternion value
+	 */
+	float getToGoQuaternionElement(int index) {return _toGoQuaternion(index);}
 
 private:
 	// The range limits of the hover thrust configuration/estimate
@@ -175,13 +193,19 @@ private:
 	matrix::Vector3f _vel_dot; /**< velocity derivative (replacement for acceleration estimate) */
 	matrix::Vector3f _vel_int; /**< integral term of the velocity controller */
 	float _yaw{}; /**< current heading */
+	matrix::Quatf _q{}; /**< current attitude */
 
 	// Setpoints
-	matrix::Vector3f _pos_sp; /**< desired position */
 	matrix::Vector3f _vel_sp; /**< desired velocity */
-	matrix::Vector3f _acc_sp; /**< desired acceleration */
+	matrix::Vector3f _pos_sp; /**< desired position */
 	matrix::Vector3f _thr_sp; /**< desired thrust */
 	float _yaw_sp{}; /**< desired heading */
+	matrix::Vector3f _acc_sp; /**< desired acceleration */
 	float _yawspeed_sp{}; /** desired yaw-speed */
+
+	matrix::Quatf _toGoQuaternion;
+
+	// Debug
+	matrix::Quatf _debug_s;
 
 };

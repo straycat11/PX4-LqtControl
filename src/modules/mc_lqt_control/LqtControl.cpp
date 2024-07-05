@@ -68,6 +68,9 @@ bool LqtControl::init()
 
 	_time_stamp_last_loop = hrt_absolute_time();
 	ScheduleNow();
+	_dbg_array.id = 1;
+	strncpy(_dbg_array.name, "dbg_array", 10);
+	_pub_dbg_array = orb_advertise(ORB_ID(debug_array), &_dbg_array);
 
 	return true;
 }
@@ -275,7 +278,7 @@ void LqtControl::parameters_update(bool force)
 }
 
 PositionControlStates LqtControl::set_vehicle_states(const vehicle_local_position_s
-		&vehicle_local_position)
+		&vehicle_local_position, const vehicle_attitude_s &vehicle_attitude)
 {
 	PositionControlStates states;
 
@@ -325,6 +328,7 @@ PositionControlStates LqtControl::set_vehicle_states(const vehicle_local_positio
 	}
 
 	states.yaw = vehicle_local_position.heading;
+	states.q = Quatf(vehicle_attitude.q);
 
 	return states;
 }
@@ -344,6 +348,7 @@ void LqtControl::Run()
 
 	perf_begin(_cycle_perf);
 	vehicle_local_position_s vehicle_local_position;
+	vehicle_attitude_s vehicle_attitude;
 
 	if (_local_pos_sub.update(&vehicle_local_position)) {
 		const float dt =
@@ -379,7 +384,7 @@ void LqtControl::Run()
 			}
 		}
 
-		PositionControlStates states{set_vehicle_states(vehicle_local_position)};
+		PositionControlStates states{set_vehicle_states(vehicle_local_position, vehicle_attitude)};
 
 		// if a goto setpoint available this publishes a trajectory setpoint to go there
 		if (_goto_control.checkForSetpoint(vehicle_local_position.timestamp_sample,
@@ -521,6 +526,8 @@ void LqtControl::Run()
 				_control.setInputSetpoint(generateFailsafeSetpoint(vehicle_local_position.timestamp_sample, states, true));
 				_control.setVelocityLimits(_param_mpc_xy_vel_max.get(), _param_mpc_z_vel_max_up.get(), _param_mpc_z_vel_max_dn.get());
 				_control.update(dt);
+
+
 			}
 
 			// Publish internal position control setpoints
@@ -536,6 +543,18 @@ void LqtControl::Run()
 			_control.getAttitudeSetpoint(attitude_setpoint);
 			attitude_setpoint.timestamp = hrt_absolute_time();
 			_vehicle_attitude_setpoint_pub.publish(attitude_setpoint);
+
+			DebugVars debugVars;
+			_control.getDebug(debugVars);
+			for (size_t i = 0; i < 4; i++) {
+				_dbg_array.data[i] = _control.getToGoQuaternionElement(i);
+			}
+			for (size_t i = 4; i < 8; i++) {
+				_dbg_array.data[i] = debugVars.s(i);
+			}
+
+			_dbg_array.timestamp = attitude_setpoint.timestamp;
+			orb_publish(ORB_ID(debug_array),_pub_dbg_array, &_dbg_array);
 
 		} else {
 			// an update is necessary here because otherwise the takeoff state doesn't get skipped with non-altitude-controlled modes

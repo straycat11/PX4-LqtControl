@@ -60,7 +60,10 @@
 #include <uORB/topics/vehicle_control_mode.h>
 #include <uORB/topics/vehicle_land_detected.h>
 #include <uORB/topics/vehicle_local_position.h>
+#include <uORB/topics/vehicle_attitude.h>
 #include <uORB/topics/vehicle_local_position_setpoint.h>
+
+#include <uORB/topics/debug_array.h>
 
 using namespace time_literals;
 
@@ -123,6 +126,7 @@ private:
 	uORB::Subscription _vehicle_constraints_sub{ORB_ID(vehicle_constraints)};
 	uORB::Subscription _vehicle_control_mode_sub{ORB_ID(vehicle_control_mode)};
 	uORB::Subscription _vehicle_land_detected_sub{ORB_ID(vehicle_land_detected)};
+	uORB::Subscription _vehicle_attitude_sub{ORB_ID(vehicle_attitude)};
 
 	hrt_abstime _time_stamp_last_loop{0};		/**< time stamp of last loop iteration */
 	hrt_abstime _time_position_control_enabled{0};
@@ -203,6 +207,10 @@ private:
 		(ParamFloat<px4::params::MPC_YAWRAUTO_ACC>) _param_mpc_yawrauto_acc
 	);
 
+	/* advertise debug array */
+	struct debug_array_s _dbg_array;
+	orb_advert_t _pub_dbg_array;
+
 	control::BlockDerivative _vel_x_deriv; /**< velocity derivative in x */
 	control::BlockDerivative _vel_y_deriv; /**< velocity derivative in y */
 	control::BlockDerivative _vel_z_deriv; /**< velocity derivative in z */
@@ -227,7 +235,7 @@ private:
 	/**
 	 * Check for validity of positon/velocity states.
 	 */
-	PositionControlStates set_vehicle_states(const vehicle_local_position_s &local_pos);
+	PositionControlStates set_vehicle_states(const vehicle_local_position_s &local_pos, const vehicle_attitude_s &attitude);
 
 	/**
 	 * Generate setpoint to bridge no executable setpoint being available.
