@@ -552,7 +552,16 @@ void LqtControl::Run()
 			for (size_t i = 4; i < 8; i++) {
 				_dbg_array.data[i] = debugVars.s(i);
 			}
-
+			for (size_t i = 8; i < 12; i++) {
+				_dbg_array.data[i] = debugVars.y(i);
+			}
+			for (size_t i = 12; i < 15; i++) {
+				_dbg_array.data[i] = debugVars.acc_sp(i);
+			}
+			for (size_t i = 15; i < 18; i++) {
+				_dbg_array.data[i] = debugVars.acc_sp_body(i);
+			}
+				_dbg_array.data[18] = debugVars.yaw;
 			_dbg_array.timestamp = attitude_setpoint.timestamp;
 			orb_publish(ORB_ID(debug_array),_pub_dbg_array, &_dbg_array);
 

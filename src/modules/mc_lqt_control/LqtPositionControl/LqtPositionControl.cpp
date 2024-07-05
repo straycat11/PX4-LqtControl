@@ -170,13 +170,17 @@ void LqtPositionControl::_toGoAccelerationControl()
 	Dcmf ned2body = Dcm<float>(_q);
 	Vector3f acc_sp_body = ned2body * _acc_sp;
 	float s_4 = sqrtf(0.5f * (1.f - acc_sp_body(2)));
-	Vector3f s_first_three_elements = (Vector3f(0, 0, 1).cross(acc_sp_body))/(2.f*s_4);
+	Vector3f s_first_three_elements = (Vector3f(0.f, 0.f, 1.f).cross(acc_sp_body))/(2.f*s_4);
 	Quatf s = Quatf(s_first_three_elements(0),s_first_three_elements(1),s_first_three_elements(2),s_4);
 
 	_debug_s = s;
-	float delta_yaw = _yaw_sp - Eulerf(_q).psi();
-	Vector3f y_first_three_elements = (Vector3f(0,0,1)*sinf(delta_yaw/2.f));
+	float yaw_sp = PX4_ISFINITE(_yaw_sp) ? _yaw_sp : _yaw;
+	float delta_yaw = yaw_sp - Eulerf(_q).psi();
+	Vector3f y_first_three_elements = Vector3f(0.f,0.f,1.f*sinf(delta_yaw/2.f));
 	float y_4 = cosf(delta_yaw/2.f);
+	_debug_y = Quatf(y_first_three_elements(0),y_first_three_elements(1),y_first_three_elements(2),y_4);
+	_debug_acc_sp_body = acc_sp_body;
+	_debug_yaw = sinf(delta_yaw/2.f);
 
 	_toGoQuaternion = s * Quatf(y_first_three_elements(0),y_first_three_elements(1),y_first_three_elements(2),y_4);
 
@@ -248,4 +252,8 @@ void LqtPositionControl::getAttitudeSetpoint(vehicle_attitude_setpoint_s &attitu
 void LqtPositionControl::getDebug(DebugVars &debug) const
 {
 	debug.s = _debug_s;
+	debug.y = _debug_y;
+	debug.acc_sp_body = _debug_acc_sp_body;
+	debug.acc_sp = _acc_sp;
+	debug.yaw = _debug_yaw;
 }

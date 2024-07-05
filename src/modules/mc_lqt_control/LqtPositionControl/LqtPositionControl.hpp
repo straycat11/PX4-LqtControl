@@ -26,6 +26,10 @@ struct PositionControlStates {
 
 struct DebugVars {
 	matrix::Quatf s;
+	matrix::Quatf y;
+	matrix::Vector3f acc_sp;
+	matrix::Vector3f acc_sp_body;
+	float yaw;
 };
 
 class LqtPositionControl
@@ -207,5 +211,8 @@ private:
 
 	// Debug
 	matrix::Quatf _debug_s;
+	matrix::Quatf _debug_y;
+	matrix::Vector3f _debug_acc_sp_body;
+	float _debug_yaw;
 
 };
