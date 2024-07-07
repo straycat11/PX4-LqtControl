@@ -55,6 +55,7 @@ void LqtPositionControl::setState(const PositionControlStates &states)
 	_yaw = states.yaw;
 	_vel_dot = states.acceleration;
 	_q = states.q;
+	_ang_vel = states.angular_velocity;
 }
 
 void LqtPositionControl::setInputSetpoint(const trajectory_setpoint_s &setpoint)
@@ -180,9 +181,10 @@ void LqtPositionControl::_toGoAccelerationControl()
 	float y_4 = cosf(delta_yaw/2.f);
 	_debug_y = Quatf(y_first_three_elements(0),y_first_three_elements(1),y_first_three_elements(2),y_4);
 	_debug_acc_sp_body = acc_sp_body;
-	_debug_yaw = sinf(delta_yaw/2.f);
+	_debug_yaw = y_first_three_elements(1);
 
 	_toGoQuaternion = s * Quatf(y_first_three_elements(0),y_first_three_elements(1),y_first_three_elements(2),y_4);
+	ControlMath::toGoToAttitude(_toGoQuaternion,_ang_vel,_debug_acc_sp_body);
 
 	float z_specific_force = -CONSTANTS_ONE_G;
 
@@ -256,4 +258,5 @@ void LqtPositionControl::getDebug(DebugVars &debug) const
 	debug.acc_sp_body = _debug_acc_sp_body;
 	debug.acc_sp = _acc_sp;
 	debug.yaw = _debug_yaw;
+	debug.toGo = _toGoQuaternion;
 }

@@ -22,11 +22,13 @@ struct PositionControlStates {
 	matrix::Vector3f acceleration;
 	float yaw;
 	matrix::Quatf q;
+	matrix::Vector3f angular_velocity;
 };
 
 struct DebugVars {
 	matrix::Quatf s;
 	matrix::Quatf y;
+	matrix::Quatf toGo;
 	matrix::Vector3f acc_sp;
 	matrix::Vector3f acc_sp_body;
 	float yaw;
@@ -198,6 +200,7 @@ private:
 	matrix::Vector3f _vel_int; /**< integral term of the velocity controller */
 	float _yaw{}; /**< current heading */
 	matrix::Quatf _q{}; /**< current attitude */
+	matrix::Vector3f _ang_vel{}; /**< angular velocity */
 
 	// Setpoints
 	matrix::Vector3f _vel_sp; /**< desired velocity */

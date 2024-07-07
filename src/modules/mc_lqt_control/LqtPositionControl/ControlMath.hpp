@@ -54,6 +54,13 @@ namespace ControlMath
 void thrustToAttitude(const matrix::Vector3f &thr_sp, const float yaw_sp, vehicle_attitude_setpoint_s &att_sp);
 
 /**
+ * Creates attitude setpoint from to-go quaternion.
+ * @param toGoQuaternion yaw incorporated to-go quaternion
+ * @param att_sp attitude setpoint to fill
+ */
+void toGoToAttitude(matrix::Quatf &to_qo_quaternion, matrix::Vector3f angular_velocity, matrix::Vector3f &control_torques);
+
+/**
  * Limits the tilt angle between two unit vectors
  * @param body_unit unit vector that will get adjusted if angle is too big
  * @param world_unit fixed vector to measure the angle against

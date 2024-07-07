@@ -278,7 +278,7 @@ void LqtControl::parameters_update(bool force)
 }
 
 PositionControlStates LqtControl::set_vehicle_states(const vehicle_local_position_s
-		&vehicle_local_position, const vehicle_attitude_s &vehicle_attitude)
+		&vehicle_local_position, const vehicle_attitude_s &vehicle_attitude, const vehicle_angular_velocity_s &vehicle_angular_velocity)
 {
 	PositionControlStates states;
 
@@ -329,6 +329,7 @@ PositionControlStates LqtControl::set_vehicle_states(const vehicle_local_positio
 
 	states.yaw = vehicle_local_position.heading;
 	states.q = Quatf(vehicle_attitude.q);
+	states.angular_velocity = Vector3f(vehicle_angular_velocity.xyz);
 
 	return states;
 }
@@ -349,6 +350,7 @@ void LqtControl::Run()
 	perf_begin(_cycle_perf);
 	vehicle_local_position_s vehicle_local_position;
 	vehicle_attitude_s vehicle_attitude;
+	vehicle_angular_velocity_s vehicle_angular_velocity;
 
 	if (_local_pos_sub.update(&vehicle_local_position)) {
 		const float dt =
@@ -384,7 +386,7 @@ void LqtControl::Run()
 			}
 		}
 
-		PositionControlStates states{set_vehicle_states(vehicle_local_position, vehicle_attitude)};
+		PositionControlStates states{set_vehicle_states(vehicle_local_position, vehicle_attitude, vehicle_angular_velocity)};
 
 		// if a goto setpoint available this publishes a trajectory setpoint to go there
 		if (_goto_control.checkForSetpoint(vehicle_local_position.timestamp_sample,
@@ -546,13 +548,13 @@ void LqtControl::Run()
 
 			DebugVars debugVars;
 			_control.getDebug(debugVars);
-			for (size_t i = 0; i < 4; i++) {
-				_dbg_array.data[i] = _control.getToGoQuaternionElement(i);
+			for (size_t i = 23; i < 27; i++) {
+				_dbg_array.data[i] = debugVars.toGo(i);
 			}
 			for (size_t i = 4; i < 8; i++) {
 				_dbg_array.data[i] = debugVars.s(i);
 			}
-			for (size_t i = 8; i < 12; i++) {
+			for (size_t i = 19; i < 23; i++) {
 				_dbg_array.data[i] = debugVars.y(i);
 			}
 			for (size_t i = 12; i < 15; i++) {
