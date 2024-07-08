@@ -184,7 +184,9 @@ void LqtPositionControl::_toGoAccelerationControl()
 	_debug_yaw = y_first_three_elements(1);
 
 	_toGoQuaternion = s * Quatf(y_first_three_elements(0),y_first_three_elements(1),y_first_three_elements(2),y_4);
-	ControlMath::toGoToAttitude(_toGoQuaternion,_ang_vel,_debug_acc_sp_body);
+	Vector3f additionalCommand = Vector3f(0.f,0.f,0.f);
+	ControlMath::toGoToAttitude(_toGoQuaternion,_ang_vel,additionalCommand);
+	ControlMath::addIfNotNanVector3f(_debug_acc_sp_body, additionalCommand);
 
 	float z_specific_force = -CONSTANTS_ONE_G;
 
