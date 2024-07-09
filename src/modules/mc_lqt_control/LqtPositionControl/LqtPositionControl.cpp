@@ -256,6 +256,20 @@ void LqtPositionControl::getLocalPositionSetpoint(vehicle_local_position_setpoin
 	_thr_sp.copyTo(local_position_setpoint.thrust);
 }
 
+void LqtPositionControl::getLocalPositionSetpointLqt(vehicle_local_position_setpoint_lqt_s &local_position_setpoint_lqt) const
+{
+	local_position_setpoint_lqt.x = _pos_sp(0);
+	local_position_setpoint_lqt.y = _pos_sp(1);
+	local_position_setpoint_lqt.z = _pos_sp(2);
+	local_position_setpoint_lqt.yaw = _yaw_sp;
+	local_position_setpoint_lqt.yawspeed = _yawspeed_sp;
+	local_position_setpoint_lqt.vx = _vel_sp(0);
+	local_position_setpoint_lqt.vy = _vel_sp(1);
+	local_position_setpoint_lqt.vz = _vel_sp(2);
+	_acc_sp.copyTo(local_position_setpoint_lqt.acceleration);
+	_debug_acc_sp_body.copyTo(local_position_setpoint_lqt.torque);
+}
+
 void LqtPositionControl::getAttitudeSetpoint(vehicle_attitude_setpoint_s &attitude_setpoint) const
 {
 	ControlMath::thrustToAttitude(_thr_sp, _yaw_sp, attitude_setpoint);

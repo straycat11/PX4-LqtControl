@@ -14,6 +14,7 @@
 #include <uORB/topics/trajectory_setpoint.h>
 #include <uORB/topics/vehicle_attitude_setpoint.h>
 #include <uORB/topics/vehicle_local_position_setpoint.h>
+#include <uORB/topics/vehicle_local_position_setpoint_lqt.h>
 #include <uORB/topics/debug_array.h> // Debug
 
 struct PositionControlStates {
@@ -138,6 +139,15 @@ public:
 	 * @param local_position_setpoint reference to struct to fill up
 	 */
 	void getLocalPositionSetpoint(vehicle_local_position_setpoint_s &local_position_setpoint) const;
+
+
+	/**
+	 * Get the controllers output local position setpoint lqtπ
+	 * These setpoints are the ones which were executed on including PID output and feed-forward.
+	 * The acceleration or thrust setpoints can be used for attitude control.
+	 * @param local_position_setpoint reference to struct to fill up
+	 */
+	void getLocalPositionSetpointLqt(vehicle_local_position_setpoint_lqt_s &local_position_setpoint_lqt) const;
 
 	/**
 	 * Get the controllers output attitude setpoint

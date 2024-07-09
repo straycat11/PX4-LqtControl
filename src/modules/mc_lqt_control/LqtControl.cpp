@@ -545,6 +545,14 @@ void LqtControl::Run()
 			local_pos_sp.timestamp = hrt_absolute_time();
 			_local_pos_sp_pub.publish(local_pos_sp);
 
+			// Publish internal position control setpoints lqt
+			// on top of the input/feed-forward setpoints these containt the PID corrections
+			// This message is used by other modules (such as Landdetector) to determine vehicle intention.
+			vehicle_local_position_setpoint_lqt_s local_pos_sp_lqt{};
+			_control.getLocalPositionSetpointLqt(local_pos_sp_lqt);
+			local_pos_sp_lqt.timestamp = hrt_absolute_time();
+			_local_pos_sp_lqt_pub.publish(local_pos_sp_lqt);
+
 			// Publish attitude setpoint output
 			vehicle_attitude_setpoint_s attitude_setpoint{};
 			_control.getAttitudeSetpoint(attitude_setpoint);
