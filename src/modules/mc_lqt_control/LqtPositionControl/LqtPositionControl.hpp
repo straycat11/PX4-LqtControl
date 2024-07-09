@@ -180,6 +180,9 @@ private:
 	matrix::Vector3f _gain_vel_p; ///< Velocity control proportional gain
 	matrix::Vector3f _gain_vel_i; ///< Velocity control integral gain
 	matrix::Vector3f _gain_vel_d; ///< Velocity control derivative gain
+	matrix::Matrix3f _gain_vel_K; ///< Velocity lqt control K
+	matrix::Matrix3f _gain_vel_K_z; ///< Velocity lqt control K_z
+	matrix::Matrix3f _gain_vel_K_f; ///< Velocity lqt control K_f
 
 	// Limits
 	float _lim_vel_horizontal{}; ///< Horizontal velocity limit with feed forward and position control
@@ -216,6 +219,7 @@ private:
 	matrix::Quatf _debug_s;
 	matrix::Quatf _debug_y;
 	matrix::Vector3f _debug_acc_sp_body;
+	matrix::Vector3f _acc_sp_lqt;
 	float _debug_yaw;
 
 };

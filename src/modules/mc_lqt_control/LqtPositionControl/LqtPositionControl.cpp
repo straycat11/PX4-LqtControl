@@ -11,6 +11,10 @@ void LqtPositionControl::setVelocityGains(const Vector3f &P, const Vector3f &I, 
 	_gain_vel_p = P;
 	_gain_vel_i = I;
 	_gain_vel_d = D;
+
+	_gain_vel_K = diag(Vector3f(-1.245f,-1.245f,-0.905f));
+	_gain_vel_K_f = diag(Vector3f(-1.596f,-1.596f,-1.552f));
+	_gain_vel_K_z = diag(Vector3f(1.338f,1.338f,0.955f));
 }
 
 void LqtPositionControl::setVelocityLimits(const float vel_horizontal, const float vel_up, const float vel_down)
@@ -111,6 +115,11 @@ void LqtPositionControl::_velocityControl(const float dt)
 	// No control input from setpoints or corresponding states which are NAN
 	ControlMath::addIfNotNanVector3f(_acc_sp, acc_sp_velocity);
 
+	Vector3f vel_sp_K = _gain_vel_K * _vel;
+	Vector3f vel_sp_K_z = _gain_vel_K_z * _vel_sp;
+	Vector3f vel_sp_K_f = _gain_vel_K_f * Vector3f(0.f,0.f,CONSTANTS_ONE_G);
+	_acc_sp_lqt = vel_sp_K + vel_sp_K_z + vel_sp_K_f;
+
 	_toGoAccelerationControl();
 
 	// Integrator anti-windup in vertical direction
@@ -169,9 +178,9 @@ void LqtPositionControl::_toGoAccelerationControl()
 	// Assume standard acceleration due to gravity in vertical direction for attitude generation
 
 	Dcmf ned2body = Dcm<float>(_q);
-	Vector3f acc_sp_body = ned2body * _acc_sp;
-	float s_4 = sqrtf(0.5f * (1.f - acc_sp_body(2)));
-	Vector3f s_first_three_elements = (Vector3f(0.f, 0.f, 1.f).cross(acc_sp_body))/(2.f*s_4);
+	Vector3f acc_sp_body_normalized = ned2body * _acc_sp_lqt.normalized();
+	float s_4 = sqrtf(0.5f * (1.f - acc_sp_body_normalized(2)));
+	Vector3f s_first_three_elements = (Vector3f(0.f, 0.f, 1.f).cross(acc_sp_body_normalized))/(2.f*s_4);
 	Quatf s = Quatf(s_first_three_elements(0),s_first_three_elements(1),s_first_three_elements(2),s_4);
 
 	_debug_s = s;
@@ -180,7 +189,7 @@ void LqtPositionControl::_toGoAccelerationControl()
 	Vector3f y_first_three_elements = Vector3f(0.f,0.f,1.f*sinf(delta_yaw/2.f));
 	float y_4 = cosf(delta_yaw/2.f);
 	_debug_y = Quatf(y_first_three_elements(0),y_first_three_elements(1),y_first_three_elements(2),y_4);
-	_debug_acc_sp_body = acc_sp_body;
+	_debug_acc_sp_body = acc_sp_body_normalized;
 	_debug_yaw = y_first_three_elements(1);
 
 	_toGoQuaternion = s * Quatf(y_first_three_elements(0),y_first_three_elements(1),y_first_three_elements(2),y_4);
