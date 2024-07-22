@@ -52,6 +52,7 @@
 #include <uORB/topics/vehicle_control_mode.h>
 #include <uORB/topics/vehicle_land_detected.h>
 #include <uORB/topics/vehicle_local_position.h>
+#include <uORB/topics/vehicle_local_position_setpoint_lqt.h>
 #include <uORB/topics/vehicle_rates_setpoint.h>
 #include <uORB/topics/vehicle_status.h>
 #include <lib/mathlib/math/filter/AlphaFilter.hpp>
@@ -105,6 +106,7 @@ private:
 	uORB::Subscription _vehicle_land_detected_sub{ORB_ID(vehicle_land_detected)};
 	uORB::Subscription _vehicle_local_position_sub{ORB_ID(vehicle_local_position)};
 	uORB::Subscription _vehicle_status_sub{ORB_ID(vehicle_status)};
+	uORB::Subscription _vehicle_local_position_lqt_sub{ORB_ID(vehicle_local_position_setpoint_lqt)};
 
 	uORB::SubscriptionCallbackWorkItem _vehicle_attitude_sub{this, ORB_ID(vehicle_attitude)};
 
@@ -117,6 +119,8 @@ private:
 	perf_counter_t  _loop_perf;             /**< loop duration performance counter */
 
 	matrix::Vector3f _thrust_setpoint_body; /**< body frame 3D thrust vector */
+	float _thrust_setpoint_body_lqt; /**< body frame 3D thrust vector */
+	matrix::Vector3f _torque_setpoint_body_lqt; /**< body frame 3D torque vector */
 
 	float _man_yaw_sp{0.f};                 /**< current yaw setpoint in manual mode */
 	float _man_tilt_max;                    /**< maximum tilt allowed for manual flight [rad] */
@@ -128,6 +132,7 @@ private:
 
 	hrt_abstime _last_run{0};
 	hrt_abstime _last_attitude_setpoint{0};
+	hrt_abstime _last_position_lqt_setpoint{0};
 
 	bool _spooled_up{false}; ///< used to make sure the vehicle cannot take off during the spoolup time
 	bool _landed{true};
