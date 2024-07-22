@@ -16,3 +16,5 @@ float32[3] torque	# normalized thrust vector in NED
 
 float32 yaw		# in radians NED -PI..+PI
 float32 yawspeed	# in radians/sec
+
+float32 heave		# in normalized thrust
