@@ -230,6 +230,7 @@ private:
 	matrix::Quatf _debug_y;
 	matrix::Vector3f _debug_acc_sp_body;
 	matrix::Vector3f _acc_sp_lqt;
+	matrix::Vector3f _torque_sp_lqt;
 	float _thr_sp_lqt;
 	float _debug_yaw;
 

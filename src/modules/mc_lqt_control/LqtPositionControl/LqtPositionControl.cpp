@@ -194,9 +194,10 @@ void LqtPositionControl::_toGoAccelerationControl()
 	_debug_yaw = y_first_three_elements(1);
 
 	_toGoQuaternion = s * Quatf(y_first_three_elements(0),y_first_three_elements(1),y_first_three_elements(2),y_4);
-	Vector3f additionalCommand = Vector3f(0.f,0.f,0.f);
-	ControlMath::toGoToAttitude(_toGoQuaternion,_ang_vel,additionalCommand);
-	ControlMath::addIfNotNanVector3f(_debug_acc_sp_body, additionalCommand);
+	// Vector3f additionalCommand = Vector3f(0.f,0.f,0.f);
+	ControlMath::toGoToAttitude(_toGoQuaternion,_ang_vel,_torque_sp_lqt);
+	// ControlMath::addIfNotNanVector3f(_torque_sp_lqt, additionalCommand);
+	_torque_sp_lqt(2) = 0.f;
 
 	float z_specific_force = -CONSTANTS_ONE_G;
 
@@ -268,7 +269,7 @@ void LqtPositionControl::getLocalPositionSetpointLqt(vehicle_local_position_setp
 	local_position_setpoint_lqt.vy = _vel_sp(1);
 	local_position_setpoint_lqt.vz = _vel_sp(2);
 	_acc_sp.copyTo(local_position_setpoint_lqt.acceleration);
-	_debug_acc_sp_body.copyTo(local_position_setpoint_lqt.torque);
+	_torque_sp_lqt.copyTo(local_position_setpoint_lqt.torque);
 	local_position_setpoint_lqt.heave = _thr_sp_lqt;
 }
 
