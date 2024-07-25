@@ -12,9 +12,9 @@ void LqtPositionControl::setVelocityGains(const Vector3f &P, const Vector3f &I, 
 	_gain_vel_i = I;
 	_gain_vel_d = D;
 
-	_gain_vel_K = diag(Vector3f(-1.245f,-1.245f,-0.905f));
-	_gain_vel_K_f = diag(Vector3f(-1.596f,-1.596f,-1.552f));
-	_gain_vel_K_z = diag(Vector3f(1.338f,1.338f,0.955f));
+	_gain_vel_K = diag(Vector3f(-3.245f,-3.245f,-0.905f));
+	_gain_vel_K_f = diag(Vector3f(-3.596f,-3.596f,-1.552f));
+	_gain_vel_K_z = diag(Vector3f(3.338f,3.338f,0.955f));
 }
 
 void LqtPositionControl::setVelocityLimits(const float vel_horizontal, const float vel_up, const float vel_down)
@@ -181,8 +181,8 @@ void LqtPositionControl::_toGoAccelerationControl()
 	Dcmf ned2body = Dcm<float>(_q);
 	Vector3f acc_sp_body_normalized = ned2body * _acc_sp_lqt.normalized();
 	float s_4 = sqrtf(0.5f * (1.f - acc_sp_body_normalized(2)));
-	Vector3f s_first_three_elements = (Vector3f(0.f, 0.f, 1.f).cross(acc_sp_body_normalized))/(2.f*s_4);
-	Quatf s = Quatf(s_first_three_elements(0),s_first_three_elements(1),s_first_three_elements(2),s_4);
+	Vector3f s_first_three_elements = (Vector3f(0.f, 0.f, -1.f).cross(acc_sp_body_normalized))/(2.f*s_4);
+	Quatf s = Quatf(s_4,s_first_three_elements(0),s_first_three_elements(1),s_first_three_elements(2));
 
 	_debug_s = s;
 	float yaw_sp = PX4_ISFINITE(_yaw_sp) ? _yaw_sp : _yaw;
@@ -193,11 +193,11 @@ void LqtPositionControl::_toGoAccelerationControl()
 	_debug_acc_sp_body = acc_sp_body_normalized;
 	_debug_yaw = y_first_three_elements(1);
 
-	_toGoQuaternion = s * Quatf(y_first_three_elements(0),y_first_three_elements(1),y_first_three_elements(2),y_4);
+	_toGoQuaternion = s * Quatf(y_4, y_first_three_elements(0),y_first_three_elements(1),y_first_three_elements(2));
 	// Vector3f additionalCommand = Vector3f(0.f,0.f,0.f);
 	ControlMath::toGoToAttitude(_toGoQuaternion,_ang_vel,_torque_sp_lqt);
 	// ControlMath::addIfNotNanVector3f(_torque_sp_lqt, additionalCommand);
-	_torque_sp_lqt(2) = 0.f;
+	// _torque_sp_lqt(2) = 0.f;
 
 	float z_specific_force = -CONSTANTS_ONE_G;
 
@@ -254,7 +254,7 @@ void LqtPositionControl::getLocalPositionSetpoint(vehicle_local_position_setpoin
 	local_position_setpoint.vx = _vel_sp(0);
 	local_position_setpoint.vy = _vel_sp(1);
 	local_position_setpoint.vz = _vel_sp(2);
-	_acc_sp.copyTo(local_position_setpoint.acceleration);
+	_acc_sp_lqt.copyTo(local_position_setpoint.acceleration);
 	_thr_sp.copyTo(local_position_setpoint.thrust);
 }
 

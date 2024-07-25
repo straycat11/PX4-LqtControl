@@ -57,8 +57,8 @@ void toGoToAttitude(matrix::Quatf &to_qo_quaternion, Vector3f angular_velocity, 
 				(inertia(2)-inertia(0))*angular_velocity(0)*angular_velocity(2),
 				(inertia(0)-inertia(1))*angular_velocity(0)*angular_velocity(1));
 	Matrix3f lyapunov_g = diag(Vector3f(arm_length/inertia(0),arm_length/inertia(1),arm_length/inertia(2)));
-	Matrix3f lyapunov_m = diag(Vector3f(10.f,10.f,1e-3f));
-	Matrix3f lyapunov_n = diag(Vector3f(2.5f,2.5f,5e-3f));
+	Matrix3f lyapunov_m = diag(Vector3f(100.f,100.f,1.f));
+	Matrix3f lyapunov_n = diag(Vector3f(12.5f,12.5f,5e-3f));
 	control_torques = inv(lyapunov_g)*(diag(inertia)*(lyapunov_m*to_qo_quaternion.imag()-lyapunov_n*angular_velocity)-lyapunov_s);
 }
 
