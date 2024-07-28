@@ -254,7 +254,7 @@ void LqtPositionControl::getLocalPositionSetpoint(vehicle_local_position_setpoin
 	local_position_setpoint.vx = _vel_sp(0);
 	local_position_setpoint.vy = _vel_sp(1);
 	local_position_setpoint.vz = _vel_sp(2);
-	_acc_sp_lqt.copyTo(local_position_setpoint.acceleration);
+	_acc_sp.copyTo(local_position_setpoint.acceleration);
 	_thr_sp.copyTo(local_position_setpoint.thrust);
 }
 
@@ -268,7 +268,7 @@ void LqtPositionControl::getLocalPositionSetpointLqt(vehicle_local_position_setp
 	local_position_setpoint_lqt.vx = _vel_sp(0);
 	local_position_setpoint_lqt.vy = _vel_sp(1);
 	local_position_setpoint_lqt.vz = _vel_sp(2);
-	_acc_sp.copyTo(local_position_setpoint_lqt.acceleration);
+	_acc_sp_lqt.copyTo(local_position_setpoint_lqt.acceleration);
 	_torque_sp_lqt.copyTo(local_position_setpoint_lqt.torque);
 	local_position_setpoint_lqt.heave = _thr_sp_lqt;
 }
