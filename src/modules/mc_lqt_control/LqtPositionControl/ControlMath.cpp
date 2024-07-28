@@ -59,7 +59,7 @@ void toGoToAttitude(matrix::Quatf &to_qo_quaternion, Vector3f angular_velocity, 
 	Matrix3f lyapunov_g = diag(Vector3f(arm_length/inertia(0),arm_length/inertia(1),arm_length/inertia(2)));
 	Matrix3f lyapunov_m = diag(Vector3f(100.f,100.f,1.f));
 	Matrix3f lyapunov_n = diag(Vector3f(12.5f,12.5f,5e-3f));
-	control_torques = inv(lyapunov_g)*(diag(inertia)*(lyapunov_m*to_qo_quaternion.imag()-lyapunov_n*angular_velocity)-lyapunov_s);
+	control_torques = inv(lyapunov_g)*(inv(diag(inertia))*(lyapunov_m*to_qo_quaternion.imag()-lyapunov_n*angular_velocity)-lyapunov_s);
 }
 
 void limitTilt(Vector3f &body_unit, const Vector3f &world_unit, const float max_angle)
