@@ -2568,7 +2568,7 @@ void Commander::updateControlMode()
 	_vehicle_control_mode.flag_armed = isArmed();
 	_vehicle_control_mode.flag_multicopter_position_control_enabled =
 		(_vehicle_status.vehicle_type == vehicle_status_s::VEHICLE_TYPE_ROTARY_WING)
-		&& !_vehicle_control_mode.flag_control_lqt_to_go_enabled
+		// && !_vehicle_control_mode.flag_control_lqt_to_go_enabled
 		&& (_vehicle_control_mode.flag_control_altitude_enabled
 		    || _vehicle_control_mode.flag_control_climb_rate_enabled
 		    || _vehicle_control_mode.flag_control_position_enabled
