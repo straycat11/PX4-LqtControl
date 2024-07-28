@@ -189,7 +189,7 @@ void LqtPositionControl::_toGoAccelerationControl()
 	float delta_yaw = yaw_sp - Eulerf(_q).psi();
 	Vector3f y_first_three_elements = Vector3f(0.f,0.f,1.f*sinf(delta_yaw/2.f));
 	float y_4 = cosf(delta_yaw/2.f);
-	_debug_y = Quatf(y_first_three_elements(0),y_first_three_elements(1),y_first_three_elements(2),y_4);
+	_debug_y = Quatf(y_4,y_first_three_elements(0),y_first_three_elements(1),y_first_three_elements(2));
 	_debug_acc_sp_body = acc_sp_body_normalized;
 	_debug_yaw = y_first_three_elements(1);
 
