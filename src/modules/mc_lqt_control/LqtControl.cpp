@@ -553,11 +553,11 @@ void LqtControl::Run()
 			local_pos_sp_lqt.timestamp = hrt_absolute_time();
 			_local_pos_sp_lqt_pub.publish(local_pos_sp_lqt);
 
-			// Publish attitude setpoint output
+			// Publish attitude setpoint output (not using this in lqt but keep it for timestamp)
 			vehicle_attitude_setpoint_s attitude_setpoint{};
 			_control.getAttitudeSetpoint(attitude_setpoint);
 			attitude_setpoint.timestamp = hrt_absolute_time();
-			_vehicle_attitude_setpoint_pub.publish(attitude_setpoint);
+			// _vehicle_attitude_setpoint_pub.publish(attitude_setpoint);
 
 			DebugVars debugVars;
 			_control.getDebug(debugVars);
