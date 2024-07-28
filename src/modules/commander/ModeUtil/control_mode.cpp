@@ -73,25 +73,28 @@ void getVehicleControlMode(uint8_t nav_state, uint8_t vehicle_type,
 
 	case vehicle_status_s::NAVIGATION_STATE_POSCTL:
 	case vehicle_status_s::NAVIGATION_STATE_POSITION_SLOW:
-	case vehicle_status_s::NAVIGATION_STATE_LQT:
 		vehicle_control_mode.flag_control_manual_enabled = true;
 		vehicle_control_mode.flag_control_position_enabled = true;
 		vehicle_control_mode.flag_control_velocity_enabled = true;
 		vehicle_control_mode.flag_control_altitude_enabled = true;
 		vehicle_control_mode.flag_control_climb_rate_enabled = true;
 		vehicle_control_mode.flag_control_attitude_enabled = true;
+		// vehicle_control_mode.flag_control_lqt_to_go_enabled = true;
 		vehicle_control_mode.flag_control_rates_enabled = true;
 		vehicle_control_mode.flag_control_allocation_enabled = true;
 		break;
 
-	// case vehicle_status_s::NAVIGATION_STATE_LQT:
-	// 	vehicle_control_mode.flag_control_manual_enabled = true;
-	// 	vehicle_control_mode.flag_control_position_enabled = true;
-	// 	vehicle_control_mode.flag_control_altitude_enabled = true;
-	// 	vehicle_control_mode.flag_control_lqt_velocity_enabled = true;
-	// 	vehicle_control_mode.flag_control_lqt_to_go_enabled = true;
-	// 	vehicle_control_mode.flag_control_allocation_enabled = true;
-	// 	break;
+	case vehicle_status_s::NAVIGATION_STATE_LQT:
+		vehicle_control_mode.flag_control_manual_enabled = true;
+		vehicle_control_mode.flag_control_position_enabled = true;
+		vehicle_control_mode.flag_control_velocity_enabled = true;
+		vehicle_control_mode.flag_control_altitude_enabled = true;
+		vehicle_control_mode.flag_control_climb_rate_enabled = true;
+		// vehicle_control_mode.flag_control_attitude_enabled = true;
+		vehicle_control_mode.flag_control_lqt_to_go_enabled = true;
+		vehicle_control_mode.flag_control_rates_enabled = true;
+		vehicle_control_mode.flag_control_allocation_enabled = true;
+		break;
 
 	case vehicle_status_s::NAVIGATION_STATE_AUTO_RTL:
 	case vehicle_status_s::NAVIGATION_STATE_AUTO_LAND:
