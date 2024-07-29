@@ -48,8 +48,8 @@ void LqtPositionControl::updateHoverThrust(const float hover_thrust_new)
 	const float previous_hover_thrust = _hover_thrust;
 	setHoverThrust(hover_thrust_new);
 
-	_vel_int(2) += (_acc_sp(2) - CONSTANTS_ONE_G) * previous_hover_thrust / _hover_thrust
-		       + CONSTANTS_ONE_G - _acc_sp(2);
+	_vel_int(2) += (_acc_sp_lqt(2) - CONSTANTS_ONE_G) * previous_hover_thrust / _hover_thrust
+		       + CONSTANTS_ONE_G - _acc_sp_lqt(2);
 }
 
 void LqtPositionControl::setState(const PositionControlStates &states)
@@ -84,7 +84,7 @@ bool LqtPositionControl::update(const float dt)
 	}
 
 	// There has to be a valid output acceleration and thrust setpoint otherwise something went wrong
-	return valid && _acc_sp.isAllFinite() && _thr_sp.isAllFinite();
+	return valid;//  && _thr_sp.isAllFinite() && _acc_sp_lqt.isAllFinite();
 }
 
 void LqtPositionControl::_positionControl()
@@ -222,13 +222,12 @@ bool LqtPositionControl::_inputValid()
 
 	// Every axis x, y, z needs to have some setpoint
 	for (int i = 0; i <= 2; i++) {
-		valid = valid && (PX4_ISFINITE(_pos_sp(i)) || PX4_ISFINITE(_vel_sp(i)) || PX4_ISFINITE(_acc_sp(i)));
+		valid = valid && (PX4_ISFINITE(_pos_sp(i)) || PX4_ISFINITE(_vel_sp(i)));
 	}
 
 	// x and y input setpoints always have to come in pairs
 	valid = valid && (PX4_ISFINITE(_pos_sp(0)) == PX4_ISFINITE(_pos_sp(1)));
 	valid = valid && (PX4_ISFINITE(_vel_sp(0)) == PX4_ISFINITE(_vel_sp(1)));
-	valid = valid && (PX4_ISFINITE(_acc_sp(0)) == PX4_ISFINITE(_acc_sp(1)));
 
 	// For each controlled state the estimate has to be valid
 	for (int i = 0; i <= 2; i++) {
