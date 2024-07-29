@@ -271,6 +271,8 @@ void LqtPositionControl::getLocalPositionSetpointLqt(vehicle_local_position_setp
 	_acc_sp_lqt.copyTo(local_position_setpoint_lqt.acceleration);
 	_torque_sp_lqt.copyTo(local_position_setpoint_lqt.torque);
 	local_position_setpoint_lqt.heave = _thr_sp_lqt;
+	_debug_y.copyTo(local_position_setpoint_lqt.y_togo);
+	_debug_s.copyTo(local_position_setpoint_lqt.s_togo);
 }
 
 void LqtPositionControl::getAttitudeSetpoint(vehicle_attitude_setpoint_s &attitude_setpoint) const

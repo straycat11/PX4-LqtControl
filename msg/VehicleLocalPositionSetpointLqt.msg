@@ -18,3 +18,6 @@ float32 yaw		# in radians NED -PI..+PI
 float32 yawspeed	# in radians/sec
 
 float32 heave		# in normalized thrust
+
+float32[4] y_togo	# yaw component of to-go quaternion
+float32[4] s_togo	# yaw-free component of to-go quaternion
