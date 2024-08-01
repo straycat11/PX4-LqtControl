@@ -387,7 +387,7 @@ MulticopterAttitudeControl::Run()
 			// 	_quat_reset_counter = v_att.quat_reset_counter;
 			// }
 
-			Vector3f rates_sp = _torque_setpoint_body_lqt*10.f;
+			Vector3f rates_sp = _torque_setpoint_body_lqt;
 
 			// const hrt_abstime now = hrt_absolute_time();
 			// autotune_attitude_control_status_s pid_autotune;

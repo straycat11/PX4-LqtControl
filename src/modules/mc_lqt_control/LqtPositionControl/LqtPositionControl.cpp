@@ -12,8 +12,8 @@ void LqtPositionControl::setVelocityGains(const Vector3f &P, const Vector3f &I, 
 	_gain_vel_i = I;
 	_gain_vel_d = D;
 
-	_gain_vel_K = diag(Vector3f(-3.245f,-3.245f,-0.905f));
-	_gain_vel_K_f = diag(Vector3f(-3.596f,-3.596f,-1.552f));
+	_gain_vel_K = diag(Vector3f(-0.1f*3.245f,-0.1f*3.245f,-0.905f));
+	_gain_vel_K_f = diag(Vector3f(-0.015f,-0.015f,-0.15f));
 	_gain_vel_K_z = diag(Vector3f(3.338f,3.338f,0.955f));
 }
 
@@ -119,7 +119,8 @@ void LqtPositionControl::_velocityControl(const float dt)
 	Vector3f vel_sp_K_z = _gain_vel_K_z * _vel_sp;
 	Vector3f vel_sp_K_f = _gain_vel_K_f * Vector3f(0.f,0.f,CONSTANTS_ONE_G);
 	_acc_sp_lqt = vel_sp_K + vel_sp_K_z + vel_sp_K_f;
-	_thr_sp_lqt = -0.032f * _acc_sp_lqt.norm(); // This magic number is found by looking at what px4 outputs and what the thr_sp_lqt is without this multiplier.
+	_thr_sp_lqt = -0.32f * _acc_sp_lqt.norm(); // This magic number is found by looking at what px4 outputs and what the thr_sp_lqt is without this multiplier.
+	_thr_sp_lqt = math::constrain(_thr_sp_lqt,-1.f,0.f);
 
 	_toGoAccelerationControl();
 
