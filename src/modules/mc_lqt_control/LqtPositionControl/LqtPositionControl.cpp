@@ -119,8 +119,9 @@ void LqtPositionControl::_velocityControl(const float dt)
 	Vector3f vel_sp_K_z = _gain_vel_K_z * _vel_sp;
 	Vector3f vel_sp_K_f = _gain_vel_K_f * Vector3f(0.f,0.f,CONSTANTS_ONE_G);
 	_acc_sp_lqt = vel_sp_K + vel_sp_K_z + vel_sp_K_f;
-	_thr_sp_lqt = -0.32f * _acc_sp_lqt.norm(); // This magic number is found by looking at what px4 outputs and what the thr_sp_lqt is without this multiplier.
-	_thr_sp_lqt = math::constrain(_thr_sp_lqt,-1.f,0.f);
+	_vel_sp_K_debug = vel_sp_K;
+	_vel_sp_K_f_debug = vel_sp_K_f;
+	_vel_sp_K_z_debug = vel_sp_K_z;
 
 	_toGoAccelerationControl();
 
@@ -273,6 +274,9 @@ void LqtPositionControl::getLocalPositionSetpointLqt(vehicle_local_position_setp
 	local_position_setpoint_lqt.heave = _thr_sp_lqt;
 	_debug_y.copyTo(local_position_setpoint_lqt.y_togo);
 	_debug_s.copyTo(local_position_setpoint_lqt.s_togo);
+	_vel_sp_K_debug.copyTo(local_position_setpoint_lqt.vel_sp_k);
+	_vel_sp_K_f_debug.copyTo(local_position_setpoint_lqt.vel_sp_k_f);
+	_vel_sp_K_z_debug.copyTo(local_position_setpoint_lqt.vel_sp_k_z);
 }
 
 void LqtPositionControl::getAttitudeSetpoint(vehicle_attitude_setpoint_s &attitude_setpoint) const
