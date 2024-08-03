@@ -12,9 +12,12 @@ void LqtPositionControl::setVelocityGains(const Vector3f &P, const Vector3f &I, 
 	_gain_vel_i = I;
 	_gain_vel_d = D;
 
-	_gain_vel_K = diag(Vector3f(-0.1f*3.245f,-0.1f*3.245f,-0.905f));
-	_gain_vel_K_f = diag(Vector3f(-0.015f,-0.015f,-0.15f));
-	_gain_vel_K_z = diag(Vector3f(3.338f,3.338f,0.955f));
+	_gain_vel_K = diag(Vector3f(-1.32f,-1.32f,-0.90f));
+	_gain_vel_K_f = diag(Vector3f(-0.60f,-0.60f,1.f*-0.65f));
+	_gain_vel_K_z = diag(Vector3f(1.41f,1.41f,0.99f));
+	// _gain_vel_K = diag(Vector3f(-0.1f*3.245f,-0.1f*3.245f,-0.905f));
+	// _gain_vel_K_f = diag(Vector3f(-0.015f,-0.015f,-0.15f));
+	// _gain_vel_K_z = diag(Vector3f(3.338f,3.338f,0.955f));
 }
 
 void LqtPositionControl::setVelocityLimits(const float vel_horizontal, const float vel_up, const float vel_down)
@@ -122,6 +125,8 @@ void LqtPositionControl::_velocityControl(const float dt)
 	_vel_sp_K_debug = vel_sp_K;
 	_vel_sp_K_f_debug = vel_sp_K_f;
 	_vel_sp_K_z_debug = vel_sp_K_z;
+	_thr_sp_lqt =  math::constrain(-0.0771f*_acc_sp_lqt.norm(),-1.f,0.f);//-0.32f * 0.24f * _acc_sp_lqt.norm(); // This magic number is found by looking at what px4 outputs and what the thr_sp_lqt is without this multiplier.
+	// _thr_sp_lqt = math::constrain(_thr_sp_lqt,-1.f,0.f);
 
 	_toGoAccelerationControl();
 
@@ -181,6 +186,7 @@ void LqtPositionControl::_toGoAccelerationControl()
 	// Assume standard acceleration due to gravity in vertical direction for attitude generation
 
 	Dcmf ned2body = Dcm<float>(_q);
+	_acc_sp_lqt(2) = math::constrain(_acc_sp_lqt(2),-1.f,0.f);
 	Vector3f acc_sp_body_normalized = ned2body * _acc_sp_lqt.normalized();
 	float s_4 = sqrtf(0.5f * (1.f - acc_sp_body_normalized(2)));
 	Vector3f s_first_three_elements = (Vector3f(0.f, 0.f, -1.f).cross(acc_sp_body_normalized))/(2.f*s_4);
