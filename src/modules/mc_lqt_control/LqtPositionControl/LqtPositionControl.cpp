@@ -277,6 +277,7 @@ void LqtPositionControl::getLocalPositionSetpointLqt(vehicle_local_position_setp
 	_vel_sp_K_debug.copyTo(local_position_setpoint_lqt.vel_sp_k);
 	_vel_sp_K_f_debug.copyTo(local_position_setpoint_lqt.vel_sp_k_f);
 	_vel_sp_K_z_debug.copyTo(local_position_setpoint_lqt.vel_sp_k_z);
+	_toGoQuaternion.copyTo(local_position_setpoint_lqt.togo);
 }
 
 void LqtPositionControl::getAttitudeSetpoint(vehicle_attitude_setpoint_s &attitude_setpoint) const
