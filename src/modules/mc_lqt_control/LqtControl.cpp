@@ -391,6 +391,9 @@ void LqtControl::Run()
 			}
 		}
 
+		_vehicle_attitude_sub.update(&vehicle_attitude);
+		_vehicle_angular_velocity_sub.update(&vehicle_angular_velocity);
+
 		PositionControlStates states{set_vehicle_states(vehicle_local_position, vehicle_attitude, vehicle_angular_velocity)};
 
 		// if a goto setpoint available this publishes a trajectory setpoint to go there
