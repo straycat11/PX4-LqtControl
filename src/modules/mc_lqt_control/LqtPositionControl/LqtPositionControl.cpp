@@ -189,19 +189,19 @@ void LqtPositionControl::_toGoAccelerationControl()
 	_acc_sp_lqt(2) = math::constrain(_acc_sp_lqt(2),-1.f,0.f);
 	Vector3f acc_sp_body_normalized = ned2body * _acc_sp_lqt.normalized();
 	float s_4 = sqrtf(0.5f * (1.f - acc_sp_body_normalized(2)));
-	Vector3f s_first_three_elements = (Vector3f(0.f, 0.f, -1.f).cross(acc_sp_body_normalized))/(2.f*s_4);
-	Quatf s = Quatf(s_4,s_first_three_elements(0),s_first_three_elements(1),s_first_three_elements(2));
+	Vector3f s_imag = (Vector3f(0.f, 0.f, -1.f).cross(acc_sp_body_normalized))/(2.f*s_4);
+	Quatf s = Quatf(s_4,s_imag(0),s_imag(1),s_imag(2));
 
 	_debug_s = s;
 	float yaw_sp = PX4_ISFINITE(_yaw_sp) ? _yaw_sp : _yaw;
 	float delta_yaw = yaw_sp - Eulerf(_q).psi();
-	Vector3f y_first_three_elements = Vector3f(0.f,0.f,1.f*sinf(delta_yaw/2.f));
+	Vector3f y_imag = Vector3f(0.f,0.f,1.f*sinf(delta_yaw/2.f));
 	float y_4 = cosf(delta_yaw/2.f);
-	_debug_y = Quatf(y_4,y_first_three_elements(0),y_first_three_elements(1),y_first_three_elements(2));
+	_debug_y = Quatf(y_4,y_imag(0),y_imag(1),y_imag(2));
 	_debug_acc_sp_body = acc_sp_body_normalized;
-	_debug_yaw = y_first_three_elements(1);
+	_debug_yaw = y_imag(1);
 
-	_toGoQuaternion = s * Quatf(y_4, y_first_three_elements(0),y_first_three_elements(1),y_first_three_elements(2));
+	_toGoQuaternion = s * Quatf(y_4, y_imag(0),y_imag(1),y_imag(2));
 	// Vector3f additionalCommand = Vector3f(0.f,0.f,0.f);
 	ControlMath::toGoToAttitude(_toGoQuaternion,_ang_vel,_torque_sp_lqt);
 	// ControlMath::addIfNotNanVector3f(_torque_sp_lqt, additionalCommand);
