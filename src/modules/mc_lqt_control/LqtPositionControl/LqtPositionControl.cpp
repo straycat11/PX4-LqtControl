@@ -125,7 +125,7 @@ void LqtPositionControl::_velocityControl(const float dt)
 	_vel_sp_K_debug = vel_sp_K;
 	_vel_sp_K_f_debug = vel_sp_K_f;
 	_vel_sp_K_z_debug = vel_sp_K_z;
-	_thr_sp_lqt =  math::constrain(-0.0771f*_acc_sp_lqt.norm(),-1.f,0.f);//-0.32f * 0.24f * _acc_sp_lqt.norm(); // This magic number is found by looking at what px4 outputs and what the thr_sp_lqt is without this multiplier.
+	_thr_sp_lqt =  math::constrain(-0.0370f*_acc_sp_lqt.norm(),-1.f,0.f);//-0.32f * 0.24f * _acc_sp_lqt.norm(); // This magic number is found by looking at what px4 outputs and what the thr_sp_lqt is without this multiplier.
 	// _thr_sp_lqt = math::constrain(_thr_sp_lqt,-1.f,0.f);
 
 	_toGoAccelerationControl();
