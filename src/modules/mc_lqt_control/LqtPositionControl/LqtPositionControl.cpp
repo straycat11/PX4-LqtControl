@@ -185,7 +185,7 @@ void LqtPositionControl::_toGoAccelerationControl()
 {
 	// Assume standard acceleration due to gravity in vertical direction for attitude generation
 
-	Dcmf ned2body = Dcm<float>(_q);
+	Dcmf ned2body(_q.inversed());
 	_acc_sp_lqt(2) = math::constrain(_acc_sp_lqt(2),-1.f,0.f);
 	Vector3f acc_sp_body_normalized = ned2body * _acc_sp_lqt.normalized();
 	float s_4 = sqrtf(0.5f * (1.f - acc_sp_body_normalized(2)));
