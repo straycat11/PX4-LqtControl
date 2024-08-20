@@ -12,9 +12,9 @@ void LqtPositionControl::setVelocityGains(const Vector3f &P, const Vector3f &I, 
 	_gain_vel_i = I;
 	_gain_vel_d = D;
 
-	_gain_vel_K = diag(Vector3f(-1.245f,-1.245f,-0.905f));
+	_gain_vel_K = diag(Vector3f(0.2*-1.245,0.2*-1.245,-0.905f));
 	_gain_vel_K_f = diag(Vector3f(-1.3885f,-1.3885f,-1.3507f));
-	_gain_vel_K_z = diag(Vector3f(1.3379f,1.3379f,0.995f));
+	_gain_vel_K_z = diag(Vector3f(0.5*1.3379,0.5*1.3379,0.995f));
 	// _gain_vel_K = diag(Vector3f(-0.1f*3.245f,-0.1f*3.245f,-0.905f));
 	// _gain_vel_K_f = diag(Vector3f(-0.015f,-0.015f,-0.15f));
 	// _gain_vel_K_z = diag(Vector3f(3.338f,3.338f,0.955f));
