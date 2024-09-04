@@ -173,7 +173,7 @@ private:
 	bool _inputValid();
 
 	void _positionControl(); ///< Position proportional control
-	void _velocityControl(const float dt); ///< Velocity PID control
+	void _velocityControl(); ///< Velocity control
 	void _toGoAccelerationControl(); ///< Acceleration setpoint processing
 
 	// Gains
