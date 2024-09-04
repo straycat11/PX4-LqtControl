@@ -202,26 +202,8 @@ void LqtPositionControl::_toGoAccelerationControl()
 	_debug_yaw = y_imag(1);
 
 	_toGoQuaternion = s * Quatf(y_4, y_imag(0),y_imag(1),y_imag(2));
-	// Vector3f additionalCommand = Vector3f(0.f,0.f,0.f);
+
 	ControlMath::toGoToAttitude(_toGoQuaternion,_ang_vel,_torque_sp_lqt);
-	// ControlMath::addIfNotNanVector3f(_torque_sp_lqt, additionalCommand);
-	// _torque_sp_lqt(2) = 0.f;
-
-	float z_specific_force = -CONSTANTS_ONE_G;
-
-	if (!_decouple_horizontal_and_vertical_acceleration) {
-		// Include vertical acceleration setpoint for better horizontal acceleration tracking
-		z_specific_force += _acc_sp(2);
-	}
-
-	Vector3f body_z = Vector3f(-_acc_sp(0), -_acc_sp(1), -z_specific_force).normalized();
-	ControlMath::limitTilt(body_z, Vector3f(0, 0, 1), _lim_tilt);
-	// Convert to thrust assuming hover thrust produces standard gravity
-	const float thrust_ned_z = _acc_sp(2) * (_hover_thrust / CONSTANTS_ONE_G) - _hover_thrust;
-	// Project thrust to planned body attitude
-	const float cos_ned_body = (Vector3f(0, 0, 1).dot(body_z));
-	const float collective_thrust = math::min(thrust_ned_z / cos_ned_body, -_lim_thr_min);
-	_thr_sp = body_z * collective_thrust;
 }
 
 bool LqtPositionControl::_inputValid()
