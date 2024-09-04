@@ -64,10 +64,6 @@
 #include <uORB/topics/vehicle_attitude.h>
 #include <uORB/topics/vehicle_local_position_setpoint.h>
 #include <uORB/topics/vehicle_local_position_setpoint_lqt.h>
-
-#include <uORB/topics/debug_array.h>
-#include <uORB/topics/debug_vect.h>
-
 using namespace time_literals;
 
 
@@ -211,12 +207,6 @@ private:
 		(ParamFloat<px4::params::MPC_YAWRAUTO_MAX>) _param_mpc_yawrauto_max,
 		(ParamFloat<px4::params::MPC_YAWRAUTO_ACC>) _param_mpc_yawrauto_acc
 	);
-
-	/* advertise debug array */
-	struct debug_array_s _dbg_array;
-	struct debug_vect_s _dbg_vect;
-	orb_advert_t _pub_dbg_array;
-	orb_advert_t _pub_dbg_vect;
 
 	control::BlockDerivative _vel_x_deriv; /**< velocity derivative in x */
 	control::BlockDerivative _vel_y_deriv; /**< velocity derivative in y */

@@ -187,12 +187,6 @@ void LqtPositionControl::getLocalPositionSetpointLqt(vehicle_local_position_setp
 	_toGoQuaternion.copyTo(local_position_setpoint_lqt.togo);
 }
 
-void LqtPositionControl::getAttitudeSetpoint(vehicle_attitude_setpoint_s &attitude_setpoint) const
-{
-	ControlMath::thrustToAttitude(_thr_sp, _yaw_sp, attitude_setpoint);
-	attitude_setpoint.yaw_sp_move_rate = _yawspeed_sp;
-}
-
 void LqtPositionControl::getDebug(DebugVars &debug) const
 {
 	debug.s = _debug_s;

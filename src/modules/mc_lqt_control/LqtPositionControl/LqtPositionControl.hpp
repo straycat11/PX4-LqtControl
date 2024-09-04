@@ -141,14 +141,6 @@ public:
 	void getLocalPositionSetpointLqt(vehicle_local_position_setpoint_lqt_s &local_position_setpoint_lqt) const;
 
 	/**
-	 * Get the controllers output attitude setpoint
-	 * This attitude setpoint was generated from the resulting acceleration setpoint after position and velocity control.
-	 * It needs to be executed by the attitude controller to achieve velocity and position tracking.
-	 * @param attitude_setpoint reference to struct to fill up
-	 */
-	void getAttitudeSetpoint(vehicle_attitude_setpoint_s &attitude_setpoint) const;
-
-	/**
 	 * Get debug
 	 * @param debug debug struct to fill up
 	 */

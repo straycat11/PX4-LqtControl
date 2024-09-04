@@ -52,14 +52,6 @@ LqtControl::LqtControl() :
 	parameters_update(true);
 	_tilt_limit_slew_rate.setSlewRate(.2f);
 	_takeoff_status_pub.advertise();
-
-	_dbg_array.id = 1;
-	strncpy(_dbg_array.name, "dbg_array", 10);
-	_pub_dbg_array = orb_advertise(ORB_ID(debug_array), &_dbg_array);
-
-	/* advertise debug vect */
-	strncpy(_dbg_vect.name, "vel3D", 10);
-	_pub_dbg_vect = orb_advertise(ORB_ID(debug_vect), &_dbg_vect);
 }
 
 LqtControl::~LqtControl()
@@ -555,38 +547,6 @@ void LqtControl::Run()
 			_control.getLocalPositionSetpointLqt(local_pos_sp_lqt);
 			local_pos_sp_lqt.timestamp = hrt_absolute_time();
 			_local_pos_sp_lqt_pub.publish(local_pos_sp_lqt);
-
-			// Publish attitude setpoint output (not using this in lqt but keep it for timestamp)
-			vehicle_attitude_setpoint_s attitude_setpoint{};
-			_control.getAttitudeSetpoint(attitude_setpoint);
-			attitude_setpoint.timestamp = hrt_absolute_time();
-			// _vehicle_attitude_setpoint_pub.publish(attitude_setpoint);
-
-			DebugVars debugVars;
-			_control.getDebug(debugVars);
-			for (size_t i = 23; i < 27; i++) {
-				_dbg_array.data[i] = debugVars.toGo(i);
-			}
-			for (size_t i = 4; i < 8; i++) {
-				_dbg_array.data[i] = debugVars.s(i);
-			}
-			for (size_t i = 19; i < 23; i++) {
-				_dbg_array.data[i] = debugVars.y(i);
-			}
-			for (size_t i = 12; i < 15; i++) {
-				_dbg_array.data[i] = debugVars.acc_sp(i);
-			}
-			for (size_t i = 15; i < 18; i++) {
-				_dbg_array.data[i] = debugVars.acc_sp_body(i);
-			}
-				_dbg_array.data[18] = debugVars.yaw;
-			_dbg_array.timestamp = attitude_setpoint.timestamp;
-			_dbg_vect.timestamp = attitude_setpoint.timestamp;
-			_dbg_vect.x = debugVars.acc_sp_body(0);
-			_dbg_vect.y = debugVars.acc_sp_body(1);
-			_dbg_vect.z = debugVars.acc_sp_body(2);
-			orb_publish(ORB_ID(debug_array),_pub_dbg_array, &_dbg_array);
-			orb_publish(ORB_ID(debug_vect),_pub_dbg_vect, &_dbg_vect);
 
 		} else {
 			// an update is necessary here because otherwise the takeoff state doesn't get skipped with non-altitude-controlled modes
