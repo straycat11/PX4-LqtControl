@@ -8,16 +8,9 @@ const trajectory_setpoint_s LqtPositionControl::empty_trajectory_setpoint = {0, 
 
 void LqtPositionControl::setVelocityGains(const Vector3f &P, const Vector3f &I, const Vector3f &D)
 {
-	_gain_vel_p = P;
-	_gain_vel_i = I;
-	_gain_vel_d = D;
-
 	_gain_vel_K = diag(Vector3f(0.2*-1.245,0.2*-1.245,4*-0.905));
 	_gain_vel_K_f = diag(Vector3f(-1.3885f,-1.3885f,-1.3507f));
 	_gain_vel_K_z = diag(Vector3f(0.5*1.3379,0.5*1.3379,2*0.995));
-	// _gain_vel_K = diag(Vector3f(-0.1f*3.245f,-0.1f*3.245f,-0.905f));
-	// _gain_vel_K_f = diag(Vector3f(-0.015f,-0.015f,-0.15f));
-	// _gain_vel_K_z = diag(Vector3f(3.338f,3.338f,0.955f));
 }
 
 void LqtPositionControl::setVelocityLimits(const float vel_horizontal, const float vel_up, const float vel_down)
