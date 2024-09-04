@@ -34,7 +34,6 @@
 #pragma once
 
 #include "LqtPositionControl/LqtPositionControl.hpp"
-#include "LqtTakeoff/LqtTakeoff.hpp"
 #include "LqtGotoControl/LqtGotoControl.hpp"
 
 #include <drivers/drv_hrt.h>
@@ -86,8 +85,6 @@ public:
 private:
 	void Run() override;
 
-	TakeoffHandling _takeoff; /**< state machine and ramp to bring the vehicle off the ground without jumps */
-
 	orb_advert_t _mavlink_log_pub{nullptr};
 
 	/**
@@ -112,7 +109,6 @@ private:
 	 */
 	void parameters_update(bool force);
 
-	uORB::PublicationData<takeoff_status_s>              _takeoff_status_pub{ORB_ID(takeoff_status)};
 	uORB::Publication<vehicle_attitude_setpoint_s>	     _vehicle_attitude_setpoint_pub{ORB_ID(vehicle_attitude_setpoint)};
 	// uORB::Publication<vehicle_local_position_setpoint_s> _local_pos_sp_pub{ORB_ID(vehicle_local_position_setpoint)};	/**< vehicle local position setpoint publication */
 	uORB::Publication<vehicle_local_position_setpoint_lqt_s> _local_pos_sp_lqt_pub{ORB_ID(vehicle_local_position_setpoint_lqt)};	/**< vehicle local position setpoint lqt publication */
@@ -153,12 +149,6 @@ private:
 		// Position Control
 		(ParamFloat<px4::params::MPC_XY_P>)         _param_mpc_xy_p,
 		(ParamFloat<px4::params::MPC_Z_P>)          _param_mpc_z_p,
-		(ParamFloat<px4::params::MPC_XY_VEL_P_ACC>) _param_mpc_xy_vel_p_acc,
-		(ParamFloat<px4::params::MPC_XY_VEL_I_ACC>) _param_mpc_xy_vel_i_acc,
-		(ParamFloat<px4::params::MPC_XY_VEL_D_ACC>) _param_mpc_xy_vel_d_acc,
-		(ParamFloat<px4::params::MPC_Z_VEL_P_ACC>)  _param_mpc_z_vel_p_acc,
-		(ParamFloat<px4::params::MPC_Z_VEL_I_ACC>)  _param_mpc_z_vel_i_acc,
-		(ParamFloat<px4::params::MPC_Z_VEL_D_ACC>)  _param_mpc_z_vel_d_acc,
 		(ParamFloat<px4::params::MPC_XY_VEL_MAX>)   _param_mpc_xy_vel_max,
 		(ParamFloat<px4::params::MPC_Z_V_AUTO_UP>)  _param_mpc_z_v_auto_up,
 		(ParamFloat<px4::params::MPC_Z_VEL_MAX_UP>) _param_mpc_z_vel_max_up,
@@ -169,10 +159,6 @@ private:
 		(ParamBool<px4::params::MPC_ACC_DECOUPLE>)  _param_mpc_acc_decouple,
 
 		// Takeoff / Land
-		(ParamFloat<px4::params::COM_SPOOLUP_TIME>) _param_com_spoolup_time, /**< time to let motors spool up after arming */
-		(ParamBool<px4::params::COM_THROW_EN>)      _param_com_throw_en, /**< throw launch enabled  */
-		(ParamFloat<px4::params::MPC_TKO_RAMP_T>)   _param_mpc_tko_ramp_t,   /**< time constant for smooth takeoff ramp */
-		(ParamFloat<px4::params::MPC_TKO_SPEED>)    _param_mpc_tko_speed,
 		(ParamFloat<px4::params::MPC_LAND_SPEED>)   _param_mpc_land_speed,
 
 		(ParamFloat<px4::params::MPC_VEL_MANUAL>)   _param_mpc_vel_manual,
@@ -182,7 +168,6 @@ private:
 		(ParamFloat<px4::params::MPC_LAND_ALT2>)    _param_mpc_land_alt2,    /**< downwards speed limited below this altitude */
 		(ParamInt<px4::params::MPC_POS_MODE>)       _param_mpc_pos_mode,
 		(ParamInt<px4::params::MPC_ALT_MODE>)       _param_mpc_alt_mode,
-		(ParamFloat<px4::params::MPC_TILTMAX_LND>)  _param_mpc_tiltmax_lnd,  /**< maximum tilt for landing and smooth takeoff */
 		(ParamFloat<px4::params::MPC_THR_MIN>)      _param_mpc_thr_min,
 		(ParamFloat<px4::params::MPC_THR_MAX>)      _param_mpc_thr_max,
 		(ParamFloat<px4::params::MPC_THR_XY_MARG>)  _param_mpc_thr_xy_marg,

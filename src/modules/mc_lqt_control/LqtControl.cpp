@@ -51,7 +51,6 @@ LqtControl::LqtControl() :
 {
 	parameters_update(true);
 	_tilt_limit_slew_rate.setSlewRate(.2f);
-	_takeoff_status_pub.advertise();
 }
 
 LqtControl::~LqtControl()
@@ -130,7 +129,6 @@ void LqtControl::parameters_update(bool force)
 			num_changed += _param_mpc_z_vel_max_up.commit_no_notification(z_vel);
 			num_changed += _param_mpc_z_v_auto_dn.commit_no_notification(z_vel * 0.75f);
 			num_changed += _param_mpc_z_vel_max_dn.commit_no_notification(z_vel * 0.75f);
-			num_changed += _param_mpc_tko_speed.commit_no_notification(z_vel * 0.6f);
 			num_changed += _param_mpc_land_speed.commit_no_notification(z_vel * 0.5f);
 		}
 
@@ -149,21 +147,9 @@ void LqtControl::parameters_update(bool force)
 					    "Maximum tilt limit has been constrained to a safe value", MAX_SAFE_TILT_DEG);
 		}
 
-		if (_param_mpc_tiltmax_lnd.get() > _param_mpc_tiltmax_air.get()) {
-			_param_mpc_tiltmax_lnd.set(_param_mpc_tiltmax_air.get());
-			_param_mpc_tiltmax_lnd.commit();
-			mavlink_log_critical(&_mavlink_log_pub, "Land tilt has been constrained by max tilt\t");
-			/* EVENT
-			 * @description <param>MPC_TILTMAX_LND</param> is set to {1:.0}.
-			 */
-			events::send<float>(events::ID("mc_lqt_ctrl_land_tilt_set"), events::Log::Warning,
-					    "Land tilt limit has been constrained by maximum tilt", _param_mpc_tiltmax_air.get());
-		}
-
 		_control.setPositionGains(Vector3f(_param_mpc_xy_p.get(), _param_mpc_xy_p.get(), _param_mpc_z_p.get()));
 		_control.setVelocityGains();
 		_control.setHorizontalThrustMargin(_param_mpc_thr_xy_marg.get());
-		_control.decoupleHorizontalAndVecticalAcceleration(_param_mpc_acc_decouple.get());
 		_goto_control.setParamMpcAccHor(_param_mpc_acc_hor.get());
 		_goto_control.setParamMpcAccDownMax(_param_mpc_acc_down_max.get());
 		_goto_control.setParamMpcAccUpMax(_param_mpc_acc_up_max.get());
@@ -242,14 +228,6 @@ void LqtControl::parameters_update(bool force)
 			events::send<float>(events::ID("mc_lqt_ctrl_down_vel_set"), events::Log::Warning,
 					    "Descent speed has been constrained by max speed", _param_mpc_z_vel_max_dn.get());
 		}
-
-		// initialize vectors from params and enforce constraints
-		_param_mpc_tko_speed.set(math::min(_param_mpc_tko_speed.get(), _param_mpc_z_vel_max_up.get()));
-		_param_mpc_land_speed.set(math::min(_param_mpc_land_speed.get(), _param_mpc_z_vel_max_dn.get()));
-
-		_takeoff.setSpoolupTime(_param_com_spoolup_time.get());
-		_takeoff.setTakeoffRampTime(_param_mpc_tko_ramp_t.get());
-		_takeoff.generateInitialRampValue(_param_mpc_z_vel_p_acc.get());
 	}
 }
 
@@ -388,51 +366,10 @@ void LqtControl::Run()
 				_vehicle_constraints.speed_up = _param_mpc_z_vel_max_up.get();
 			}
 
-			if (_vehicle_control_mode.flag_control_offboard_enabled) {
-
-				const bool want_takeoff = _vehicle_control_mode.flag_armed
-							  && (vehicle_local_position.timestamp_sample < _setpoint.timestamp + 1_s);
-
-				if (want_takeoff && PX4_ISFINITE(_setpoint.position[2])
-				    && (_setpoint.position[2] < states.position(2))) {
-
-					_vehicle_constraints.want_takeoff = true;
-
-				} else if (want_takeoff && PX4_ISFINITE(_setpoint.velocity[2])
-					   && (_setpoint.velocity[2] < 0.f)) {
-
-					_vehicle_constraints.want_takeoff = true;
-
-				} else if (want_takeoff && PX4_ISFINITE(_setpoint.acceleration[2])
-					   && (_setpoint.acceleration[2] < 0.f)) {
-
-					_vehicle_constraints.want_takeoff = true;
-
-				} else {
-					_vehicle_constraints.want_takeoff = false;
-				}
-
-				// override with defaults
-				_vehicle_constraints.speed_up = _param_mpc_z_vel_max_up.get();
-				_vehicle_constraints.speed_down = _param_mpc_z_vel_max_dn.get();
-			}
-
-			bool skip_takeoff = _param_com_throw_en.get();
-			// handle smooth takeoff
-			_takeoff.updateTakeoffState(_vehicle_control_mode.flag_armed, _vehicle_land_detected.landed,
-						    _vehicle_constraints.want_takeoff,
-						    _vehicle_constraints.speed_up, skip_takeoff, vehicle_local_position.timestamp_sample);
-
-			const bool not_taken_off             = (_takeoff.getTakeoffState() < TakeoffState::rampup);
-			const bool flying                    = (_takeoff.getTakeoffState() >= TakeoffState::flight);
+			const bool flying                    = true;//(_takeoff.getTakeoffState() >= TakeoffState::flight);
 			const bool flying_but_ground_contact = (flying && _vehicle_land_detected.ground_contact);
 
-			// make sure takeoff ramp is not amended by acceleration feed-forward
-			if (_takeoff.getTakeoffState() == TakeoffState::rampup && PX4_ISFINITE(_setpoint.velocity[2])) {
-				_setpoint.acceleration[2] = NAN;
-			}
-
-			if (not_taken_off || flying_but_ground_contact) {
+			if (flying_but_ground_contact) {
 				// we are not flying yet and need to avoid any corrections
 				_setpoint = LqtPositionControl::empty_trajectory_setpoint;
 				_setpoint.timestamp = vehicle_local_position.timestamp_sample;
@@ -443,12 +380,10 @@ void LqtControl::Run()
 			}
 
 			// limit tilt during takeoff ramupup
-			const float tilt_limit_deg = (_takeoff.getTakeoffState() < TakeoffState::flight)
-						     ? _param_mpc_tiltmax_lnd.get() : _param_mpc_tiltmax_air.get();
+			const float tilt_limit_deg = _param_mpc_tiltmax_air.get();
 			_control.setTiltLimit(_tilt_limit_slew_rate.update(math::radians(tilt_limit_deg), dt));
 
-			const float speed_up = _takeoff.updateRamp(dt,
-					       PX4_ISFINITE(_vehicle_constraints.speed_up) ? _vehicle_constraints.speed_up : _param_mpc_z_vel_max_up.get());
+			const float speed_up = PX4_ISFINITE(_vehicle_constraints.speed_up) ? _vehicle_constraints.speed_up : _param_mpc_z_vel_max_up.get();
 			const float speed_down = PX4_ISFINITE(_vehicle_constraints.speed_down) ? _vehicle_constraints.speed_down :
 						 _param_mpc_z_vel_max_dn.get();
 
@@ -476,8 +411,6 @@ void LqtControl::Run()
 				// A change in velocity is demanded and the altitude is not controlled.
 				// Set velocity to the derivative of position
 				// because it has less bias but blend it in across the landing speed range
-				//  <  MPC_LAND_SPEED: ramp up using altitude derivative without a step
-				//  >= MPC_LAND_SPEED: use altitude derivative
 				float weighting = fminf(fabsf(_setpoint.velocity[2]) / _param_mpc_land_speed.get(), 1.f);
 				states.velocity(2) = vehicle_local_position.z_deriv * weighting + vehicle_local_position.vz * (1.f - weighting);
 			}
@@ -513,20 +446,7 @@ void LqtControl::Run()
 			_local_pos_sp_lqt_pub.publish(local_pos_sp_lqt);
 
 		} else {
-			// an update is necessary here because otherwise the takeoff state doesn't get skipped with non-altitude-controlled modes
-			_takeoff.updateTakeoffState(_vehicle_control_mode.flag_armed, _vehicle_land_detected.landed, false, 10.f, true,
-						    vehicle_local_position.timestamp_sample);
-		}
 
-		// Publish takeoff status
-		const uint8_t takeoff_state = static_cast<uint8_t>(_takeoff.getTakeoffState());
-
-		if (takeoff_state != _takeoff_status_pub.get().takeoff_state
-		    || !isEqualF(_tilt_limit_slew_rate.getState(), _takeoff_status_pub.get().tilt_limit)) {
-			_takeoff_status_pub.get().takeoff_state = takeoff_state;
-			_takeoff_status_pub.get().tilt_limit = _tilt_limit_slew_rate.getState();
-			_takeoff_status_pub.get().timestamp = hrt_absolute_time();
-			_takeoff_status_pub.update();
 		}
 	}
 

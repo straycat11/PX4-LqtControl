@@ -33,7 +33,6 @@
 
 add_subdirectory(LqtGotoControl)
 add_subdirectory(LqtPositionControl)
-add_subdirectory(LqtTakeoff)
 
 px4_add_module(
 	MODULE modules__mc_lqt_control
@@ -45,7 +44,6 @@ px4_add_module(
 	DEPENDS
 		LqtGotoControl
 		LqtPositionControl
-		LqtTakeoff
 		controllib
 		geo
 		SlewRate
