@@ -161,10 +161,7 @@ void LqtControl::parameters_update(bool force)
 		}
 
 		_control.setPositionGains(Vector3f(_param_mpc_xy_p.get(), _param_mpc_xy_p.get(), _param_mpc_z_p.get()));
-		_control.setVelocityGains(
-			Vector3f(_param_mpc_xy_vel_p_acc.get(), _param_mpc_xy_vel_p_acc.get(), _param_mpc_z_vel_p_acc.get()),
-			Vector3f(_param_mpc_xy_vel_i_acc.get(), _param_mpc_xy_vel_i_acc.get(), _param_mpc_z_vel_i_acc.get()),
-			Vector3f(_param_mpc_xy_vel_d_acc.get(), _param_mpc_xy_vel_d_acc.get(), _param_mpc_z_vel_d_acc.get()));
+		_control.setVelocityGains();
 		_control.setHorizontalThrustMargin(_param_mpc_thr_xy_marg.get());
 		_control.decoupleHorizontalAndVecticalAcceleration(_param_mpc_acc_decouple.get());
 		_goto_control.setParamMpcAccHor(_param_mpc_acc_hor.get());

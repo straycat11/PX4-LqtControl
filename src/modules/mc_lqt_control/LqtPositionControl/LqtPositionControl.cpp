@@ -6,7 +6,7 @@ using namespace matrix;
 
 const trajectory_setpoint_s LqtPositionControl::empty_trajectory_setpoint = {0, {NAN, NAN, NAN}, {NAN, NAN, NAN}, {NAN, NAN, NAN}, {NAN, NAN, NAN}, NAN, NAN};
 
-void LqtPositionControl::setVelocityGains(const Vector3f &P, const Vector3f &I, const Vector3f &D)
+void LqtPositionControl::setVelocityGains()
 {
 	_gain_vel_K = diag(Vector3f(0.2*-1.245,0.2*-1.245,4*-0.905));
 	_gain_vel_K_f = diag(Vector3f(-1.3885f,-1.3885f,-1.3507f));

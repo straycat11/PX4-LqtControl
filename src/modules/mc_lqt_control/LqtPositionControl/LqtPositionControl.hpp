@@ -49,12 +49,9 @@ public:
 	void setPositionGains(const matrix::Vector3f &P) { _gain_pos_p = P; }
 
 	/**
-	 * Set the velocity control gains
-	 * @param P 3D vector of proportional gains for x,y,z axis
-	 * @param I 3D vector of integral gains
-	 * @param D 3D vector of derivative gains
+	 * Set the lqt velocity control gains
 	 */
-	void setVelocityGains(const matrix::Vector3f &P, const matrix::Vector3f &I, const matrix::Vector3f &D);
+	void setVelocityGains();
 
 	/**
 	 * Set the minimum and maximum collective normalized thrust [0,1] that can be output by the controller
