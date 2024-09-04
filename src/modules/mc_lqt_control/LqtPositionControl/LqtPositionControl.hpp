@@ -133,15 +133,6 @@ public:
 
 
 	/**
-	 * Get the controllers output local position setpoint
-	 * These setpoints are the ones which were executed on including PID output and feed-forward.
-	 * The acceleration or thrust setpoints can be used for attitude control.
-	 * @param local_position_setpoint reference to struct to fill up
-	 */
-	void getLocalPositionSetpoint(vehicle_local_position_setpoint_s &local_position_setpoint) const;
-
-
-	/**
 	 * Get the controllers output local position setpoint lqtπ
 	 * These setpoints are the ones which were executed on including PID output and feed-forward.
 	 * The acceleration or thrust setpoints can be used for attitude control.

@@ -233,20 +233,6 @@ bool LqtPositionControl::_inputValid()
 	return valid;
 }
 
-void LqtPositionControl::getLocalPositionSetpoint(vehicle_local_position_setpoint_s &local_position_setpoint) const
-{
-	local_position_setpoint.x = _pos_sp(0);
-	local_position_setpoint.y = _pos_sp(1);
-	local_position_setpoint.z = _pos_sp(2);
-	local_position_setpoint.yaw = _yaw_sp;
-	local_position_setpoint.yawspeed = _yawspeed_sp;
-	local_position_setpoint.vx = _vel_sp(0);
-	local_position_setpoint.vy = _vel_sp(1);
-	local_position_setpoint.vz = _vel_sp(2);
-	_acc_sp.copyTo(local_position_setpoint.acceleration);
-	_thr_sp.copyTo(local_position_setpoint.thrust);
-}
-
 void LqtPositionControl::getLocalPositionSetpointLqt(vehicle_local_position_setpoint_lqt_s &local_position_setpoint_lqt) const
 {
 	local_position_setpoint_lqt.x = _pos_sp(0);
