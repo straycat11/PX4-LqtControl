@@ -122,15 +122,15 @@ void LqtGotoControl::update(const float dt, const matrix::Vector3f &position, co
 	_need_smoother_reset = false;
 
 	trajectory_setpoint.timestamp = goto_setpoint.timestamp;
-	_trajectory_setpoint_pub.publish(trajectory_setpoint);
+	// _trajectory_setpoint_pub.publish(trajectory_setpoint);
 
-	vehicle_constraints_s vehicle_constraints{
-		.timestamp = goto_setpoint.timestamp,
-		.speed_up = NAN,
-		.speed_down = NAN,
-		.want_takeoff = false
-	};
-	_vehicle_constraints_pub.publish(vehicle_constraints);
+	// vehicle_constraints_s vehicle_constraints{
+	// 	.timestamp = goto_setpoint.timestamp,
+	// 	.speed_up = NAN,
+	// 	.speed_down = NAN,
+	// 	.want_takeoff = false
+	// };
+	// _vehicle_constraints_pub.publish(vehicle_constraints);
 }
 
 void LqtGotoControl::resetPositionSmoother(const matrix::Vector3f &position)

@@ -269,6 +269,8 @@ MulticopterAttitudeControl::Run()
 
 		const bool run_att_ctrl = _vehicle_control_mode.flag_control_attitude_enabled && (is_hovering
 					  || is_tailsitter_transition);
+		const bool run_togo_att_ctrl = _vehicle_control_mode.flag_control_lqt_to_go_enabled && (is_hovering
+					  || is_tailsitter_transition);
 
 		if (run_att_ctrl) {
 
@@ -335,6 +337,80 @@ MulticopterAttitudeControl::Run()
 			rates_setpoint.pitch = rates_sp(1);
 			rates_setpoint.yaw = rates_sp(2);
 			_thrust_setpoint_body.copyTo(rates_setpoint.thrust_body);
+			rates_setpoint.timestamp = hrt_absolute_time();
+
+			_vehicle_rates_setpoint_pub.publish(rates_setpoint);
+		}
+		if (run_togo_att_ctrl) {
+
+			// Generate the attitude setpoint from stick inputs if we are in Manual/Stabilized mode
+			// if (_vehicle_control_mode.flag_control_manual_enabled &&
+			//     !_vehicle_control_mode.flag_control_altitude_enabled &&
+			//     !_vehicle_control_mode.flag_control_velocity_enabled &&
+			//     !_vehicle_control_mode.flag_control_position_enabled) {
+
+			// 	generate_attitude_setpoint(q, dt, _reset_yaw_sp);
+			// 	attitude_setpoint_generated = true;
+
+			// } else {
+				_man_roll_input_filter.reset(0.f);
+				_man_pitch_input_filter.reset(0.f);
+			// }
+
+			// Check for new attitude setpoint
+			if (_vehicle_local_position_lqt_sub.updated()) {
+				vehicle_local_position_setpoint_lqt_s vehicle_local_position_setpoint_lqt;
+
+				if (_vehicle_local_position_lqt_sub.copy(&vehicle_local_position_setpoint_lqt)
+				    && (vehicle_local_position_setpoint_lqt.timestamp > _last_position_lqt_setpoint)) {
+
+					// _attitude_control.setAttitudeSetpoint(Quatf(vehicle_attitude_setpoint.q_d), vehicle_attitude_setpoint.yaw_sp_move_rate);
+					// _thrust_setpoint_body = Vector3f(vehicle_attitude_setpoint.thrust_body);
+					_thrust_setpoint_body_lqt = vehicle_local_position_setpoint_lqt.heave;
+					_torque_setpoint_body_lqt = Vector3f(vehicle_local_position_setpoint_lqt.torque);
+					_last_position_lqt_setpoint = vehicle_local_position_setpoint_lqt.timestamp;
+				}
+			}
+
+			// Check for a heading reset
+			// if (_quat_reset_counter != v_att.quat_reset_counter) {
+			// 	const Quatf delta_q_reset(v_att.delta_q_reset);
+
+			// 	// for stabilized attitude generation only extract the heading change from the delta quaternion
+			// 	_man_yaw_sp = wrap_pi(_man_yaw_sp + Eulerf(delta_q_reset).psi());
+
+			// 	if (v_att.timestamp > _last_attitude_setpoint) {
+			// 		// adapt existing attitude setpoint unless it was generated after the current attitude estimate
+			// 		_attitude_control.adaptAttitudeSetpoint(delta_q_reset);
+			// 	}
+
+			// 	_quat_reset_counter = v_att.quat_reset_counter;
+			// }
+
+			Vector3f rates_sp = _torque_setpoint_body_lqt;
+
+			// const hrt_abstime now = hrt_absolute_time();
+			// autotune_attitude_control_status_s pid_autotune;
+
+			// if (_autotune_attitude_control_status_sub.copy(&pid_autotune)) {
+			// 	if ((pid_autotune.state == autotune_attitude_control_status_s::STATE_ROLL
+			// 	     || pid_autotune.state == autotune_attitude_control_status_s::STATE_PITCH
+			// 	     || pid_autotune.state == autotune_attitude_control_status_s::STATE_YAW
+			// 	     || pid_autotune.state == autotune_attitude_control_status_s::STATE_TEST)
+			// 	    && ((now - pid_autotune.timestamp) < 1_s)) {
+			// 		rates_sp += Vector3f(pid_autotune.rate_sp);
+			// 	}
+			// }
+
+			// publish rate setpoint
+			vehicle_rates_setpoint_s rates_setpoint{};
+			rates_setpoint.roll = rates_sp(0);
+			rates_setpoint.pitch = rates_sp(1);
+			rates_setpoint.yaw = rates_sp(2);
+			// _thrust_setpoint_body.copyTo(rates_setpoint.thrust_body);
+			rates_setpoint.thrust_body[0] = 0.f;
+			rates_setpoint.thrust_body[1] = 0.f;
+			rates_setpoint.thrust_body[2] = _thrust_setpoint_body_lqt;
 			rates_setpoint.timestamp = hrt_absolute_time();
 
 			_vehicle_rates_setpoint_pub.publish(rates_setpoint);

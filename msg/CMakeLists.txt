@@ -234,6 +234,7 @@ set(msg_files
 	VehicleLandDetected.msg
 	VehicleLocalPosition.msg
 	VehicleLocalPositionSetpoint.msg
+	VehicleLocalPositionSetpointLqt.msg
 	VehicleMagnetometer.msg
 	VehicleOdometry.msg
 	VehicleOpticalFlow.msg

@@ -5,16 +5,33 @@
  */
 #pragma once
 
+#include <drivers/drv_hrt.h>
 #include <lib/mathlib/mathlib.h>
 #include <matrix/matrix/math.hpp>
+#include <matrix/matrix/Dcm.hpp>
+#include <matrix/matrix/Euler.hpp>
+#include <uORB/Subscription.hpp>
 #include <uORB/topics/trajectory_setpoint.h>
 #include <uORB/topics/vehicle_attitude_setpoint.h>
 #include <uORB/topics/vehicle_local_position_setpoint.h>
+#include <uORB/topics/vehicle_local_position_setpoint_lqt.h>
+#include <uORB/topics/debug_array.h> // Debug
 
 struct PositionControlStates {
 	matrix::Vector3f position;
 	matrix::Vector3f velocity;
 	matrix::Vector3f acceleration;
+	float yaw;
+	matrix::Quatf q;
+	matrix::Vector3f angular_velocity;
+};
+
+struct DebugVars {
+	matrix::Quatf s;
+	matrix::Quatf y;
+	matrix::Quatf toGo;
+	matrix::Vector3f acc_sp;
+	matrix::Vector3f acc_sp_body;
 	float yaw;
 };
 
@@ -123,6 +140,15 @@ public:
 	 */
 	void getLocalPositionSetpoint(vehicle_local_position_setpoint_s &local_position_setpoint) const;
 
+
+	/**
+	 * Get the controllers output local position setpoint lqtπ
+	 * These setpoints are the ones which were executed on including PID output and feed-forward.
+	 * The acceleration or thrust setpoints can be used for attitude control.
+	 * @param local_position_setpoint reference to struct to fill up
+	 */
+	void getLocalPositionSetpointLqt(vehicle_local_position_setpoint_lqt_s &local_position_setpoint_lqt) const;
+
 	/**
 	 * Get the controllers output attitude setpoint
 	 * This attitude setpoint was generated from the resulting acceleration setpoint after position and velocity control.
@@ -132,9 +158,21 @@ public:
 	void getAttitudeSetpoint(vehicle_attitude_setpoint_s &attitude_setpoint) const;
 
 	/**
+	 * Get debug
+	 * @param debug debug struct to fill up
+	 */
+	void getDebug(DebugVars &debug) const;
+
+	/**
 	 * All setpoints are set to NAN (uncontrolled). Timestampt zero.
 	 */
 	static const trajectory_setpoint_s empty_trajectory_setpoint;
+
+
+	/**
+	 * Get to-go quaternion value
+	 */
+	float getToGoQuaternionElement(int index) {return _toGoQuaternion(index);}
 
 private:
 	// The range limits of the hover thrust configuration/estimate
@@ -145,13 +183,16 @@ private:
 
 	void _positionControl(); ///< Position proportional control
 	void _velocityControl(const float dt); ///< Velocity PID control
-	void _accelerationControl(); ///< Acceleration setpoint processing
+	void _toGoAccelerationControl(); ///< Acceleration setpoint processing
 
 	// Gains
 	matrix::Vector3f _gain_pos_p; ///< Position control proportional gain
 	matrix::Vector3f _gain_vel_p; ///< Velocity control proportional gain
 	matrix::Vector3f _gain_vel_i; ///< Velocity control integral gain
 	matrix::Vector3f _gain_vel_d; ///< Velocity control derivative gain
+	matrix::Matrix3f _gain_vel_K; ///< Velocity lqt control K
+	matrix::Matrix3f _gain_vel_K_z; ///< Velocity lqt control K_z
+	matrix::Matrix3f _gain_vel_K_f; ///< Velocity lqt control K_f
 
 	// Limits
 	float _lim_vel_horizontal{}; ///< Horizontal velocity limit with feed forward and position control
@@ -171,13 +212,29 @@ private:
 	matrix::Vector3f _vel_dot; /**< velocity derivative (replacement for acceleration estimate) */
 	matrix::Vector3f _vel_int; /**< integral term of the velocity controller */
 	float _yaw{}; /**< current heading */
+	matrix::Quatf _q{}; /**< current attitude */
+	matrix::Vector3f _ang_vel{}; /**< angular velocity */
 
 	// Setpoints
-	matrix::Vector3f _pos_sp; /**< desired position */
 	matrix::Vector3f _vel_sp; /**< desired velocity */
-	matrix::Vector3f _acc_sp; /**< desired acceleration */
+	matrix::Vector3f _pos_sp; /**< desired position */
 	matrix::Vector3f _thr_sp; /**< desired thrust */
 	float _yaw_sp{}; /**< desired heading */
+	matrix::Vector3f _acc_sp; /**< desired acceleration */
 	float _yawspeed_sp{}; /** desired yaw-speed */
+
+	matrix::Quatf _toGoQuaternion;
+
+	// Debug
+	matrix::Quatf _debug_s;
+	matrix::Quatf _debug_y;
+	matrix::Vector3f _debug_acc_sp_body;
+	matrix::Vector3f _acc_sp_lqt;
+	matrix::Vector3f _torque_sp_lqt;
+	matrix::Vector3f _vel_sp_K_debug;
+	matrix::Vector3f _vel_sp_K_f_debug;
+	matrix::Vector3f _vel_sp_K_z_debug;
+	float _thr_sp_lqt;
+	float _debug_yaw;
 
 };

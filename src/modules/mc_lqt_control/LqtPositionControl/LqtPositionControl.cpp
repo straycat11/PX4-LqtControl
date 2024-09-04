@@ -11,6 +11,13 @@ void LqtPositionControl::setVelocityGains(const Vector3f &P, const Vector3f &I, 
 	_gain_vel_p = P;
 	_gain_vel_i = I;
 	_gain_vel_d = D;
+
+	_gain_vel_K = diag(Vector3f(0.2*-1.245,0.2*-1.245,4*-0.905));
+	_gain_vel_K_f = diag(Vector3f(-1.3885f,-1.3885f,-1.3507f));
+	_gain_vel_K_z = diag(Vector3f(0.5*1.3379,0.5*1.3379,2*0.995));
+	// _gain_vel_K = diag(Vector3f(-0.1f*3.245f,-0.1f*3.245f,-0.905f));
+	// _gain_vel_K_f = diag(Vector3f(-0.015f,-0.015f,-0.15f));
+	// _gain_vel_K_z = diag(Vector3f(3.338f,3.338f,0.955f));
 }
 
 void LqtPositionControl::setVelocityLimits(const float vel_horizontal, const float vel_up, const float vel_down)
@@ -44,8 +51,8 @@ void LqtPositionControl::updateHoverThrust(const float hover_thrust_new)
 	const float previous_hover_thrust = _hover_thrust;
 	setHoverThrust(hover_thrust_new);
 
-	_vel_int(2) += (_acc_sp(2) - CONSTANTS_ONE_G) * previous_hover_thrust / _hover_thrust
-		       + CONSTANTS_ONE_G - _acc_sp(2);
+	_vel_int(2) += (_acc_sp_lqt(2) - CONSTANTS_ONE_G) * previous_hover_thrust / _hover_thrust
+		       + CONSTANTS_ONE_G - _acc_sp_lqt(2);
 }
 
 void LqtPositionControl::setState(const PositionControlStates &states)
@@ -54,6 +61,8 @@ void LqtPositionControl::setState(const PositionControlStates &states)
 	_vel = states.velocity;
 	_yaw = states.yaw;
 	_vel_dot = states.acceleration;
+	_q = states.q;
+	_ang_vel = states.angular_velocity;
 }
 
 void LqtPositionControl::setInputSetpoint(const trajectory_setpoint_s &setpoint)
@@ -78,7 +87,7 @@ bool LqtPositionControl::update(const float dt)
 	}
 
 	// There has to be a valid output acceleration and thrust setpoint otherwise something went wrong
-	return valid && _acc_sp.isAllFinite() && _thr_sp.isAllFinite();
+	return valid;//  && _thr_sp.isAllFinite() && _acc_sp_lqt.isAllFinite();
 }
 
 void LqtPositionControl::_positionControl()
@@ -109,7 +118,17 @@ void LqtPositionControl::_velocityControl(const float dt)
 	// No control input from setpoints or corresponding states which are NAN
 	ControlMath::addIfNotNanVector3f(_acc_sp, acc_sp_velocity);
 
-	_accelerationControl();
+	Vector3f vel_sp_K = _gain_vel_K * _vel;
+	Vector3f vel_sp_K_z = _gain_vel_K_z * _vel_sp;
+	Vector3f vel_sp_K_f = _gain_vel_K_f * Vector3f(0.f,0.f,CONSTANTS_ONE_G);
+	_acc_sp_lqt = vel_sp_K + vel_sp_K_z + vel_sp_K_f;
+	_vel_sp_K_debug = vel_sp_K;
+	_vel_sp_K_f_debug = vel_sp_K_f;
+	_vel_sp_K_z_debug = vel_sp_K_z;
+	_thr_sp_lqt =  math::constrain(-0.0370f*_acc_sp_lqt.norm(),-1.f,0.f);//-0.32f * 0.24f * _acc_sp_lqt.norm(); // This magic number is found by looking at what px4 outputs and what the thr_sp_lqt is without this multiplier.
+	// _thr_sp_lqt = math::constrain(_thr_sp_lqt,-1.f,0.f);
+
+	_toGoAccelerationControl();
 
 	// Integrator anti-windup in vertical direction
 	if ((_thr_sp(2) >= -_lim_thr_min && vel_error(2) >= 0.f) ||
@@ -162,9 +181,32 @@ void LqtPositionControl::_velocityControl(const float dt)
 }
 
 
-void LqtPositionControl::_accelerationControl()
+void LqtPositionControl::_toGoAccelerationControl()
 {
 	// Assume standard acceleration due to gravity in vertical direction for attitude generation
+
+	Dcmf ned2body(_q.inversed());
+	_acc_sp_lqt(2) = math::constrain(_acc_sp_lqt(2),-1.f,0.f);
+	Vector3f acc_sp_body_normalized = ned2body * _acc_sp_lqt.normalized();
+	float s_4 = sqrtf(0.5f * (1.f - acc_sp_body_normalized(2)));
+	Vector3f s_imag = (Vector3f(0.f, 0.f, -1.f).cross(acc_sp_body_normalized))/(2.f*s_4);
+	Quatf s = Quatf(s_4,s_imag(0),s_imag(1),s_imag(2));
+
+	_debug_s = s;
+	float yaw_sp = PX4_ISFINITE(_yaw_sp) ? _yaw_sp : _yaw;
+	float delta_yaw = yaw_sp - Eulerf(_q).psi();
+	Vector3f y_imag = Vector3f(0.f,0.f,1.f*sinf(delta_yaw/2.f));
+	float y_4 = cosf(delta_yaw/2.f);
+	_debug_y = Quatf(y_4,y_imag(0),y_imag(1),y_imag(2));
+	_debug_acc_sp_body = acc_sp_body_normalized;
+	_debug_yaw = y_imag(1);
+
+	_toGoQuaternion = s * Quatf(y_4, y_imag(0),y_imag(1),y_imag(2));
+	// Vector3f additionalCommand = Vector3f(0.f,0.f,0.f);
+	ControlMath::toGoToAttitude(_toGoQuaternion,_ang_vel,_torque_sp_lqt);
+	// ControlMath::addIfNotNanVector3f(_torque_sp_lqt, additionalCommand);
+	// _torque_sp_lqt(2) = 0.f;
+
 	float z_specific_force = -CONSTANTS_ONE_G;
 
 	if (!_decouple_horizontal_and_vertical_acceleration) {
@@ -188,13 +230,12 @@ bool LqtPositionControl::_inputValid()
 
 	// Every axis x, y, z needs to have some setpoint
 	for (int i = 0; i <= 2; i++) {
-		valid = valid && (PX4_ISFINITE(_pos_sp(i)) || PX4_ISFINITE(_vel_sp(i)) || PX4_ISFINITE(_acc_sp(i)));
+		valid = valid && (PX4_ISFINITE(_pos_sp(i)) || PX4_ISFINITE(_vel_sp(i)));
 	}
 
 	// x and y input setpoints always have to come in pairs
 	valid = valid && (PX4_ISFINITE(_pos_sp(0)) == PX4_ISFINITE(_pos_sp(1)));
 	valid = valid && (PX4_ISFINITE(_vel_sp(0)) == PX4_ISFINITE(_vel_sp(1)));
-	valid = valid && (PX4_ISFINITE(_acc_sp(0)) == PX4_ISFINITE(_acc_sp(1)));
 
 	// For each controlled state the estimate has to be valid
 	for (int i = 0; i <= 2; i++) {
@@ -224,8 +265,39 @@ void LqtPositionControl::getLocalPositionSetpoint(vehicle_local_position_setpoin
 	_thr_sp.copyTo(local_position_setpoint.thrust);
 }
 
+void LqtPositionControl::getLocalPositionSetpointLqt(vehicle_local_position_setpoint_lqt_s &local_position_setpoint_lqt) const
+{
+	local_position_setpoint_lqt.x = _pos_sp(0);
+	local_position_setpoint_lqt.y = _pos_sp(1);
+	local_position_setpoint_lqt.z = _pos_sp(2);
+	local_position_setpoint_lqt.yaw = _yaw_sp;
+	local_position_setpoint_lqt.yawspeed = _yawspeed_sp;
+	local_position_setpoint_lqt.vx = _vel_sp(0);
+	local_position_setpoint_lqt.vy = _vel_sp(1);
+	local_position_setpoint_lqt.vz = _vel_sp(2);
+	_acc_sp_lqt.copyTo(local_position_setpoint_lqt.acceleration);
+	_torque_sp_lqt.copyTo(local_position_setpoint_lqt.torque);
+	local_position_setpoint_lqt.heave = _thr_sp_lqt;
+	_debug_y.copyTo(local_position_setpoint_lqt.y_togo);
+	_debug_s.copyTo(local_position_setpoint_lqt.s_togo);
+	_vel_sp_K_debug.copyTo(local_position_setpoint_lqt.vel_sp_k);
+	_vel_sp_K_f_debug.copyTo(local_position_setpoint_lqt.vel_sp_k_f);
+	_vel_sp_K_z_debug.copyTo(local_position_setpoint_lqt.vel_sp_k_z);
+	_toGoQuaternion.copyTo(local_position_setpoint_lqt.togo);
+}
+
 void LqtPositionControl::getAttitudeSetpoint(vehicle_attitude_setpoint_s &attitude_setpoint) const
 {
 	ControlMath::thrustToAttitude(_thr_sp, _yaw_sp, attitude_setpoint);
 	attitude_setpoint.yaw_sp_move_rate = _yawspeed_sp;
+}
+
+void LqtPositionControl::getDebug(DebugVars &debug) const
+{
+	debug.s = _debug_s;
+	debug.y = _debug_y;
+	debug.acc_sp_body = _debug_acc_sp_body;
+	debug.acc_sp = _acc_sp;
+	debug.yaw = _debug_yaw;
+	debug.toGo = _toGoQuaternion;
 }

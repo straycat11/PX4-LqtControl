@@ -52,6 +52,14 @@ LqtControl::LqtControl() :
 	parameters_update(true);
 	_tilt_limit_slew_rate.setSlewRate(.2f);
 	_takeoff_status_pub.advertise();
+
+	_dbg_array.id = 1;
+	strncpy(_dbg_array.name, "dbg_array", 10);
+	_pub_dbg_array = orb_advertise(ORB_ID(debug_array), &_dbg_array);
+
+	/* advertise debug vect */
+	strncpy(_dbg_vect.name, "vel3D", 10);
+	_pub_dbg_vect = orb_advertise(ORB_ID(debug_vect), &_dbg_vect);
 }
 
 LqtControl::~LqtControl()
@@ -275,7 +283,7 @@ void LqtControl::parameters_update(bool force)
 }
 
 PositionControlStates LqtControl::set_vehicle_states(const vehicle_local_position_s
-		&vehicle_local_position)
+		&vehicle_local_position, const vehicle_attitude_s &vehicle_attitude, const vehicle_angular_velocity_s &vehicle_angular_velocity)
 {
 	PositionControlStates states;
 
@@ -325,6 +333,8 @@ PositionControlStates LqtControl::set_vehicle_states(const vehicle_local_positio
 	}
 
 	states.yaw = vehicle_local_position.heading;
+	states.q = Quatf(vehicle_attitude.q);
+	states.angular_velocity = Vector3f(vehicle_angular_velocity.xyz);
 
 	return states;
 }
@@ -344,6 +354,8 @@ void LqtControl::Run()
 
 	perf_begin(_cycle_perf);
 	vehicle_local_position_s vehicle_local_position;
+	vehicle_attitude_s vehicle_attitude;
+	vehicle_angular_velocity_s vehicle_angular_velocity;
 
 	if (_local_pos_sub.update(&vehicle_local_position)) {
 		const float dt =
@@ -379,7 +391,10 @@ void LqtControl::Run()
 			}
 		}
 
-		PositionControlStates states{set_vehicle_states(vehicle_local_position)};
+		_vehicle_attitude_sub.update(&vehicle_attitude);
+		_vehicle_angular_velocity_sub.update(&vehicle_angular_velocity);
+
+		PositionControlStates states{set_vehicle_states(vehicle_local_position, vehicle_attitude, vehicle_angular_velocity)};
 
 		// if a goto setpoint available this publishes a trajectory setpoint to go there
 		if (_goto_control.checkForSetpoint(vehicle_local_position.timestamp_sample,
@@ -521,21 +536,57 @@ void LqtControl::Run()
 				_control.setInputSetpoint(generateFailsafeSetpoint(vehicle_local_position.timestamp_sample, states, true));
 				_control.setVelocityLimits(_param_mpc_xy_vel_max.get(), _param_mpc_z_vel_max_up.get(), _param_mpc_z_vel_max_dn.get());
 				_control.update(dt);
+
+
 			}
 
 			// Publish internal position control setpoints
 			// on top of the input/feed-forward setpoints these containt the PID corrections
 			// This message is used by other modules (such as Landdetector) to determine vehicle intention.
-			vehicle_local_position_setpoint_s local_pos_sp{};
-			_control.getLocalPositionSetpoint(local_pos_sp);
-			local_pos_sp.timestamp = hrt_absolute_time();
-			_local_pos_sp_pub.publish(local_pos_sp);
+			// vehicle_local_position_setpoint_s local_pos_sp{};
+			// _control.getLocalPositionSetpoint(local_pos_sp);
+			// local_pos_sp.timestamp = hrt_absolute_time();
+			// _local_pos_sp_pub.publish(local_pos_sp);
 
-			// Publish attitude setpoint output
+			// Publish internal position control setpoints lqt
+			// on top of the input/feed-forward setpoints these containt the PID corrections
+			// This message is used by other modules (such as Landdetector) to determine vehicle intention.
+			vehicle_local_position_setpoint_lqt_s local_pos_sp_lqt{};
+			_control.getLocalPositionSetpointLqt(local_pos_sp_lqt);
+			local_pos_sp_lqt.timestamp = hrt_absolute_time();
+			_local_pos_sp_lqt_pub.publish(local_pos_sp_lqt);
+
+			// Publish attitude setpoint output (not using this in lqt but keep it for timestamp)
 			vehicle_attitude_setpoint_s attitude_setpoint{};
 			_control.getAttitudeSetpoint(attitude_setpoint);
 			attitude_setpoint.timestamp = hrt_absolute_time();
-			_vehicle_attitude_setpoint_pub.publish(attitude_setpoint);
+			// _vehicle_attitude_setpoint_pub.publish(attitude_setpoint);
+
+			DebugVars debugVars;
+			_control.getDebug(debugVars);
+			for (size_t i = 23; i < 27; i++) {
+				_dbg_array.data[i] = debugVars.toGo(i);
+			}
+			for (size_t i = 4; i < 8; i++) {
+				_dbg_array.data[i] = debugVars.s(i);
+			}
+			for (size_t i = 19; i < 23; i++) {
+				_dbg_array.data[i] = debugVars.y(i);
+			}
+			for (size_t i = 12; i < 15; i++) {
+				_dbg_array.data[i] = debugVars.acc_sp(i);
+			}
+			for (size_t i = 15; i < 18; i++) {
+				_dbg_array.data[i] = debugVars.acc_sp_body(i);
+			}
+				_dbg_array.data[18] = debugVars.yaw;
+			_dbg_array.timestamp = attitude_setpoint.timestamp;
+			_dbg_vect.timestamp = attitude_setpoint.timestamp;
+			_dbg_vect.x = debugVars.acc_sp_body(0);
+			_dbg_vect.y = debugVars.acc_sp_body(1);
+			_dbg_vect.z = debugVars.acc_sp_body(2);
+			orb_publish(ORB_ID(debug_array),_pub_dbg_array, &_dbg_array);
+			orb_publish(ORB_ID(debug_vect),_pub_dbg_vect, &_dbg_vect);
 
 		} else {
 			// an update is necessary here because otherwise the takeoff state doesn't get skipped with non-altitude-controlled modes
