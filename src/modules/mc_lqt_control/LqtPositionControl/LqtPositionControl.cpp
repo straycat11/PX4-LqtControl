@@ -32,22 +32,6 @@ void LqtPositionControl::setHorizontalThrustMargin(const float margin)
 	_lim_thr_xy_margin = margin;
 }
 
-void LqtPositionControl::updateHoverThrust(const float hover_thrust_new)
-{
-	// Given that the equation for thrust is T = a_sp * Th / g - Th
-	// with a_sp = desired acceleration, Th = hover thrust and g = gravity constant,
-	// we want to find the acceleration that needs to be added to the integrator in order obtain
-	// the same thrust after replacing the current hover thrust by the new one.
-	// T' = T => a_sp' * Th' / g - Th' = a_sp * Th / g - Th
-	// so a_sp' = (a_sp - g) * Th / Th' + g
-	// we can then add a_sp' - a_sp to the current integrator to absorb the effect of changing Th by Th'
-	const float previous_hover_thrust = _hover_thrust;
-	setHoverThrust(hover_thrust_new);
-
-	_vel_int(2) += (_acc_sp_lqt(2) - CONSTANTS_ONE_G) * previous_hover_thrust / _hover_thrust
-		       + CONSTANTS_ONE_G - _acc_sp_lqt(2);
-}
-
 void LqtPositionControl::setState(const PositionControlStates &states)
 {
 	_pos = states.position;

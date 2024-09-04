@@ -76,19 +76,6 @@ public:
 	void setTiltLimit(const float tilt) { _lim_tilt = tilt; }
 
 	/**
-	 * Set the normalized hover thrust
-	 * @param hover_thrust [HOVER_THRUST_MIN, HOVER_THRUST_MAX] with which the vehicle hovers not accelerating down or up with level orientation
-	 */
-	void setHoverThrust(const float hover_thrust) { _hover_thrust = math::constrain(hover_thrust, HOVER_THRUST_MIN, HOVER_THRUST_MAX); }
-
-	/**
-	 * Update the hover thrust without immediately affecting the output
-	 * by adjusting the integrator. This prevents propagating the dynamics
-	 * of the hover thrust signal directly to the output of the controller.
-	 */
-	void updateHoverThrust(const float hover_thrust_new);
-
-	/**
 	 * Set the maximum velocity to execute with feed forward and position control
 	 * @param vel_horizontal horizontal velocity limit
 	 * @param vel_up upwards velocity limit
@@ -158,10 +145,6 @@ public:
 	float getToGoQuaternionElement(int index) {return _toGoQuaternion(index);}
 
 private:
-	// The range limits of the hover thrust configuration/estimate
-	static constexpr float HOVER_THRUST_MIN = 0.05f;
-	static constexpr float HOVER_THRUST_MAX = 0.9f;
-
 	bool _inputValid();
 
 	void _positionControl(); ///< Position proportional control
@@ -183,7 +166,6 @@ private:
 	float _lim_thr_xy_margin{}; ///< Margin to keep for horizontal control when saturating prioritized vertical thrust
 	float _lim_tilt{}; ///< Maximum tilt from level the output attitude is allowed to have
 
-	float _hover_thrust{}; ///< Thrust [HOVER_THRUST_MIN, HOVER_THRUST_MAX] with which the vehicle hovers not accelerating down or up with level orientation
 	bool _decouple_horizontal_and_vertical_acceleration{true}; ///< Ignore vertical acceleration setpoint to remove its effect on the tilt setpoint
 
 	// States

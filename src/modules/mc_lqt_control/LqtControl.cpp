@@ -246,24 +246,6 @@ void LqtControl::parameters_update(bool force)
 					    "Descent speed has been constrained by max speed", _param_mpc_z_vel_max_dn.get());
 		}
 
-		if (_param_mpc_thr_hover.get() > _param_mpc_thr_max.get() ||
-		    _param_mpc_thr_hover.get() < _param_mpc_thr_min.get()) {
-			_param_mpc_thr_hover.set(math::constrain(_param_mpc_thr_hover.get(), _param_mpc_thr_min.get(),
-						 _param_mpc_thr_max.get()));
-			_param_mpc_thr_hover.commit();
-			mavlink_log_critical(&_mavlink_log_pub, "Hover thrust has been constrained by min/max\t");
-			/* EVENT
-			 * @description <param>MPC_THR_HOVER</param> is set to {1:.0}.
-			 */
-			events::send<float>(events::ID("mc_lqt_ctrl_hover_thrust_set"), events::Log::Warning,
-					    "Hover thrust has been constrained by min/max thrust", _param_mpc_thr_hover.get());
-		}
-
-		if (!_param_mpc_use_hte.get() || !_hover_thrust_initialized) {
-			_control.setHoverThrust(_param_mpc_thr_hover.get());
-			_hover_thrust_initialized = true;
-		}
-
 		// initialize vectors from params and enforce constraints
 		_param_mpc_tko_speed.set(math::min(_param_mpc_tko_speed.get(), _param_mpc_z_vel_max_up.get()));
 		_param_mpc_land_speed.set(math::min(_param_mpc_land_speed.get(), _param_mpc_z_vel_max_dn.get()));
@@ -372,17 +354,6 @@ void LqtControl::Run()
 		}
 
 		_vehicle_land_detected_sub.update(&_vehicle_land_detected);
-
-		if (_param_mpc_use_hte.get()) {
-			hover_thrust_estimate_s hte;
-
-			if (_hover_thrust_estimate_sub.update(&hte)) {
-				if (hte.valid) {
-					_control.updateHoverThrust(hte.hover_thrust);
-				}
-			}
-		}
-
 		_vehicle_attitude_sub.update(&vehicle_attitude);
 		_vehicle_angular_velocity_sub.update(&vehicle_angular_velocity);
 
@@ -458,10 +429,6 @@ void LqtControl::Run()
 			const bool not_taken_off             = (_takeoff.getTakeoffState() < TakeoffState::rampup);
 			const bool flying                    = (_takeoff.getTakeoffState() >= TakeoffState::flight);
 			const bool flying_but_ground_contact = (flying && _vehicle_land_detected.ground_contact);
-
-			if (!flying) {
-				_control.setHoverThrust(_param_mpc_thr_hover.get());
-			}
 
 			// make sure takeoff ramp is not amended by acceleration feed-forward
 			if (_takeoff.getTakeoffState() == TakeoffState::rampup && PX4_ISFINITE(_setpoint.velocity[2])) {
