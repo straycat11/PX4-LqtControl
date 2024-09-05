@@ -53,18 +53,6 @@ namespace LqtControlMath
 void toGoToAttitude(matrix::Quatf &to_qo_quaternion, matrix::Vector3f angular_velocity, matrix::Vector3f &control_torques);
 
 /**
- * Outputs the sum of two vectors but respecting the limits and priority.
- * The sum of two vectors are constraint such that v0 has priority over v1.
- * This means that if the length of (v0+v1) exceeds max, then it is constraint such
- * that v0 has priority.
- *
- * @param v0 a 2D vector that has priority given the maximum available magnitude.
- * @param v1 a 2D vector that less priority given the maximum available magnitude.
- * @return 2D vector
- */
-matrix::Vector2f constrainXY(const matrix::Vector2f &v0, const matrix::Vector2f &v1, const float &max);
-
-/**
  * Adds e.g. feed-forward to the setpoint making sure existing or added NANs have no influence on control.
  * This function is udeful to support all the different setpoint combinations of position, velocity, acceleration with NAN representing an uncommitted value.
  * @param setpoint existing possibly NAN setpoint to add to
