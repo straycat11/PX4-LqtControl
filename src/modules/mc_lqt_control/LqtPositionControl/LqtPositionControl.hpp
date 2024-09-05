@@ -131,15 +131,8 @@ private:
 	matrix::Quatf _toGoQuaternion;
 
 	// Debug
-	matrix::Quatf _debug_s;
-	matrix::Quatf _debug_y;
-	matrix::Vector3f _debug_acc_sp_body;
 	matrix::Vector3f _acc_sp_lqt;
 	matrix::Vector3f _torque_sp_lqt;
-	matrix::Vector3f _vel_sp_K_debug;
-	matrix::Vector3f _vel_sp_K_f_debug;
-	matrix::Vector3f _vel_sp_K_z_debug;
 	float _thr_sp_lqt;
-	float _debug_yaw;
 
 };
