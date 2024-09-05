@@ -53,27 +53,6 @@ public:
 	void setVelocityGains();
 
 	/**
-	 * Set the minimum and maximum collective normalized thrust [0,1] that can be output by the controller
-	 * @param min minimum thrust e.g. 0.1 or 0
-	 * @param max maximum thrust e.g. 0.9 or 1
-	 */
-	void setThrustLimits(const float min, const float max);
-
-	/**
-	 * Set margin that is kept for horizontal control when prioritizing vertical thrust
-	 * @param margin of normalized thrust that is kept for horizontal control e.g. 0.3
-	 */
-	void setHorizontalThrustMargin(const float margin);
-
-	/**
-	 * Set the maximum velocity to execute with feed forward and position control
-	 * @param vel_horizontal horizontal velocity limit
-	 * @param vel_up upwards velocity limit
-	 * @param vel_down downwards velocity limit
-	 */
-	void setVelocityLimits(const float vel_horizontal, const float vel_up, float vel_down);
-
-	/**
 	 * Pass the current vehicle state to the controller
 	 * @param PositionControlStates structure
 	 */
@@ -96,12 +75,6 @@ public:
 	 * @return true if update succeeded and output setpoint is executable, false if not
 	 */
 	bool update(const float dt);
-
-	/**
-	 * Set the integral term in xy to 0.
-	 * @see _vel_int
-	 */
-	void resetIntegral() { _vel_int.setZero(); }
 
 	/**
 	 * If set, the tilt setpoint is computed by assuming no vertical acceleration
@@ -147,22 +120,12 @@ private:
 	matrix::Matrix3f _gain_vel_K_z; ///< Velocity lqt control K_z
 	matrix::Matrix3f _gain_vel_K_f; ///< Velocity lqt control K_f
 
-	// Limits
-	float _lim_vel_horizontal{}; ///< Horizontal velocity limit with feed forward and position control
-	float _lim_vel_up{}; ///< Upwards velocity limit with feed forward and position control
-	float _lim_vel_down{}; ///< Downwards velocity limit with feed forward and position control
-	float _lim_thr_min{}; ///< Minimum collective thrust allowed as output [-1,0] e.g. -0.9
-	float _lim_thr_max{}; ///< Maximum collective thrust allowed as output [-1,0] e.g. -0.1
-	float _lim_thr_xy_margin{}; ///< Margin to keep for horizontal control when saturating prioritized vertical thrust
-	float _lim_tilt{}; ///< Maximum tilt from level the output attitude is allowed to have
-
 	bool _decouple_horizontal_and_vertical_acceleration{true}; ///< Ignore vertical acceleration setpoint to remove its effect on the tilt setpoint
 
 	// States
 	matrix::Vector3f _pos; /**< current position */
 	matrix::Vector3f _vel; /**< current velocity */
 	matrix::Vector3f _vel_dot; /**< velocity derivative (replacement for acceleration estimate) */
-	matrix::Vector3f _vel_int; /**< integral term of the velocity controller */
 	float _yaw{}; /**< current heading */
 	matrix::Quatf _q{}; /**< current attitude */
 	matrix::Vector3f _ang_vel{}; /**< angular velocity */

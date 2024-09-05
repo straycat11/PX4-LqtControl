@@ -13,18 +13,6 @@ void LqtPositionControl::setVelocityGains()
 	_gain_vel_K_z = diag(Vector3f(0.5*1.3379,0.5*1.3379,2*0.995));
 }
 
-void LqtPositionControl::setThrustLimits(const float min, const float max)
-{
-	// make sure there's always enough thrust vector length to infer the attitude
-	_lim_thr_min = math::max(min, 10e-4f);
-	_lim_thr_max = max;
-}
-
-void LqtPositionControl::setHorizontalThrustMargin(const float margin)
-{
-	_lim_thr_xy_margin = margin;
-}
-
 void LqtPositionControl::setState(const PositionControlStates &states)
 {
 	_pos = states.position;

@@ -231,9 +231,6 @@ void LqtControl::Run()
 				_setpoint = LqtPositionControl::empty_trajectory_setpoint;
 				_setpoint.timestamp = vehicle_local_position.timestamp_sample;
 				Vector3f(0.f, 0.f, 100.f).copyTo(_setpoint.acceleration); // High downwards acceleration to make sure there's no thrust
-
-				// prevent any integrator windup
-				_control.resetIntegral();
 			}
 
 			_control.setInputSetpoint(_setpoint);
@@ -261,14 +258,6 @@ void LqtControl::Run()
 
 
 			}
-
-			// Publish internal position control setpoints
-			// on top of the input/feed-forward setpoints these containt the PID corrections
-			// This message is used by other modules (such as Landdetector) to determine vehicle intention.
-			// vehicle_local_position_setpoint_s local_pos_sp{};
-			// _control.getLocalPositionSetpoint(local_pos_sp);
-			// local_pos_sp.timestamp = hrt_absolute_time();
-			// _local_pos_sp_pub.publish(local_pos_sp);
 
 			// Publish internal position control setpoints lqt
 			// on top of the input/feed-forward setpoints these containt the PID corrections
