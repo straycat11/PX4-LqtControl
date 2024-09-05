@@ -150,20 +150,13 @@ private:
 	control::BlockDerivative _vel_x_deriv; /**< velocity derivative in x */
 	control::BlockDerivative _vel_y_deriv; /**< velocity derivative in y */
 	control::BlockDerivative _vel_z_deriv; /**< velocity derivative in z */
-	
+
 	LqtPositionControl _control; ///< class for core PID position control
 
 	hrt_abstime _last_warn{0}; /**< timer when the last warn message was sent out */
 
 	/** Timeout in us for trajectory data to get considered invalid */
 	static constexpr uint64_t TRAJECTORY_STREAM_TIMEOUT_US = 500_ms;
-
-	/** During smooth-takeoff, below ALTITUDE_THRESHOLD the yaw-control is turned off and tilt is limited */
-	static constexpr float ALTITUDE_THRESHOLD = 0.3f;
-
-	static constexpr float MAX_SAFE_TILT_DEG = 89.f; // Numerical issues above this value due to tanf
-
-	SlewRate<float> _tilt_limit_slew_rate;
 
 	/**
 	 * Check for validity of positon/velocity states.

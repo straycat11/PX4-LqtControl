@@ -50,7 +50,6 @@ LqtControl::LqtControl() :
 	_vel_z_deriv(this, "VELD")
 {
 	parameters_update(true);
-	_tilt_limit_slew_rate.setSlewRate(.2f);
 }
 
 LqtControl::~LqtControl()
