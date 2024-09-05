@@ -118,7 +118,6 @@ private:
 	// States
 	matrix::Vector3f _pos; /**< current position */
 	matrix::Vector3f _vel; /**< current velocity */
-	matrix::Vector3f _vel_dot; /**< velocity derivative (replacement for acceleration estimate) */
 	float _yaw{}; /**< current heading */
 	matrix::Quatf _q{}; /**< current attitude */
 	matrix::Vector3f _ang_vel{}; /**< angular velocity */

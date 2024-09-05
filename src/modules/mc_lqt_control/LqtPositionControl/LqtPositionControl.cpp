@@ -18,7 +18,6 @@ void LqtPositionControl::setState(const PositionControlStates &states)
 	_pos = states.position;
 	_vel = states.velocity;
 	_yaw = states.yaw;
-	_vel_dot = states.acceleration;
 	_q = states.q;
 	_ang_vel = states.angular_velocity;
 }
@@ -117,7 +116,7 @@ bool LqtPositionControl::_inputValid()
 		}
 
 		if (PX4_ISFINITE(_vel_sp(i))) {
-			valid = valid && PX4_ISFINITE(_vel(i)) && PX4_ISFINITE(_vel_dot(i));
+			valid = valid && PX4_ISFINITE(_vel(i));
 		}
 	}
 
