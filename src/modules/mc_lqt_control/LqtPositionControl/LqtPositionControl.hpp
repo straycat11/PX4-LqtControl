@@ -76,11 +76,6 @@ public:
 	 */
 	bool update(const float dt);
 
-	/**
-	 * If set, the tilt setpoint is computed by assuming no vertical acceleration
-	 */
-	void decoupleHorizontalAndVecticalAcceleration(bool val) { _decouple_horizontal_and_vertical_acceleration = val; }
-
 
 	/**
 	 * Get the controllers output local position setpoint lqtπ
@@ -119,8 +114,6 @@ private:
 	matrix::Matrix3f _gain_vel_K; ///< Velocity lqt control K
 	matrix::Matrix3f _gain_vel_K_z; ///< Velocity lqt control K_z
 	matrix::Matrix3f _gain_vel_K_f; ///< Velocity lqt control K_f
-
-	bool _decouple_horizontal_and_vertical_acceleration{true}; ///< Ignore vertical acceleration setpoint to remove its effect on the tilt setpoint
 
 	// States
 	matrix::Vector3f _pos; /**< current position */
