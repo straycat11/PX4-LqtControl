@@ -34,7 +34,6 @@
 #pragma once
 
 #include "LqtPositionControl/LqtPositionControl.hpp"
-#include "LqtGotoControl/LqtGotoControl.hpp"
 
 #include <drivers/drv_hrt.h>
 #include <lib/controllib/blocks.hpp>
@@ -151,8 +150,7 @@ private:
 	control::BlockDerivative _vel_x_deriv; /**< velocity derivative in x */
 	control::BlockDerivative _vel_y_deriv; /**< velocity derivative in y */
 	control::BlockDerivative _vel_z_deriv; /**< velocity derivative in z */
-
-	LqtGotoControl _goto_control; ///< class for handling smooth goto position setpoints
+	
 	LqtPositionControl _control; ///< class for core PID position control
 
 	hrt_abstime _last_warn{0}; /**< timer when the last warn message was sent out */

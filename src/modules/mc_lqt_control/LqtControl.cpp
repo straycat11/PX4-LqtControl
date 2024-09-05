@@ -197,12 +197,6 @@ void LqtControl::Run()
 
 		PositionControlStates states{set_vehicle_states(vehicle_local_position, vehicle_attitude, vehicle_angular_velocity)};
 
-		// if a goto setpoint available this publishes a trajectory setpoint to go there
-		if (_goto_control.checkForSetpoint(vehicle_local_position.timestamp_sample,
-						   _vehicle_control_mode.flag_multicopter_position_control_enabled)) {
-			_goto_control.update(dt, states.position, states.yaw);
-		}
-
 		_trajectory_setpoint_sub.update(&_setpoint);
 
 		adjustSetpointForEKFResets(vehicle_local_position, _setpoint);

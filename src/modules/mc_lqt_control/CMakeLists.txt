@@ -31,7 +31,6 @@
 #
 ############################################################################
 
-add_subdirectory(LqtGotoControl)
 add_subdirectory(LqtPositionControl)
 
 px4_add_module(
@@ -42,7 +41,6 @@ px4_add_module(
 		LqtControl.cpp
 		LqtControl.h
 	DEPENDS
-		LqtGotoControl
 		LqtPositionControl
 		controllib
 		geo
