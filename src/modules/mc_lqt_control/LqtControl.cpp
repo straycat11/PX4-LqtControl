@@ -281,11 +281,6 @@ trajectory_setpoint_s LqtControl::generateFailsafeSetpoint(const hrt_abstime &no
 	// rate limit the warnings
 	warn = warn && (now - _last_warn) > 2_s;
 
-	if (warn) {
-		PX4_WARN("invalid setpoints");
-		_last_warn = now;
-	}
-
 	trajectory_setpoint_s failsafe_setpoint = LqtPositionControl::empty_trajectory_setpoint;
 	failsafe_setpoint.timestamp = now;
 
