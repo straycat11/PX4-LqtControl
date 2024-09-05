@@ -37,7 +37,7 @@
 #include <lib/mathlib/mathlib.h>
 #include <lib/matrix/matrix/math.hpp>
 #include <px4_platform_common/events.h>
-#include "LqtPositionControl/ControlMath.hpp"
+#include "LqtPositionControl/LqtControlMath.hpp"
 
 using namespace matrix;
 

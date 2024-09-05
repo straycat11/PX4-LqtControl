@@ -1,5 +1,5 @@
 #include "LqtPositionControl.hpp"
-#include "ControlMath.hpp"
+#include "LqtControlMath.hpp"
 #include <geo/geo.h>
 
 using namespace matrix;
@@ -72,13 +72,13 @@ void LqtPositionControl::_positionControl()
 	// P-position controller
 	Vector3f vel_sp_position = (_pos_sp - _pos).emult(_gain_pos_p);
 	// Position and feed-forward velocity setpoints or position states being NAN results in them not having an influence
-	ControlMath::addIfNotNanVector3f(_vel_sp, vel_sp_position);
+	LqtControlMath::addIfNotNanVector3f(_vel_sp, vel_sp_position);
 	// make sure there are no NAN elements for further reference while constraining
-	ControlMath::setZeroIfNanVector3f(vel_sp_position);
+	LqtControlMath::setZeroIfNanVector3f(vel_sp_position);
 
 	// Constrain horizontal velocity by prioritizing the velocity component along the
 	// the desired position setpoint over the feed-forward term.
-	_vel_sp.xy() = ControlMath::constrainXY(vel_sp_position.xy(), (_vel_sp - vel_sp_position).xy(), _lim_vel_horizontal);
+	_vel_sp.xy() = LqtControlMath::constrainXY(vel_sp_position.xy(), (_vel_sp - vel_sp_position).xy(), _lim_vel_horizontal);
 	// Constrain velocity in z-direction.
 	_vel_sp(2) = math::constrain(_vel_sp(2), -_lim_vel_up, _lim_vel_down);
 }
@@ -120,7 +120,7 @@ void LqtPositionControl::_toGoAccelerationControl()
 
 	_toGoQuaternion = s * Quatf(y_4, y_imag(0),y_imag(1),y_imag(2));
 
-	ControlMath::toGoToAttitude(_toGoQuaternion,_ang_vel,_torque_sp_lqt);
+	LqtControlMath::toGoToAttitude(_toGoQuaternion,_ang_vel,_torque_sp_lqt);
 }
 
 bool LqtPositionControl::_inputValid()

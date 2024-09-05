@@ -32,23 +32,18 @@
  ****************************************************************************/
 
 /**
- * @file ControlMath.cpp
+ * @file LqtControlMath.cpp
  */
 
-#include "ControlMath.hpp"
+#include "LqtControlMath.hpp"
 #include <px4_platform_common/defines.h>
 #include <float.h>
 #include <mathlib/mathlib.h>
 
 using namespace matrix;
 
-namespace ControlMath
+namespace LqtControlMath
 {
-void thrustToAttitude(const Vector3f &thr_sp, const float yaw_sp, vehicle_attitude_setpoint_s &att_sp)
-{
-	bodyzToAttitude(-thr_sp, yaw_sp, att_sp);
-	att_sp.thrust_body[2] = -thr_sp.length();
-}
 void toGoToAttitude(matrix::Quatf &to_qo_quaternion, Vector3f angular_velocity, Vector3f &control_torques)
 {
 	Vector3f inertia =  Vector3f(0.029125f,0.029125f,0.055225f);
@@ -60,75 +55,6 @@ void toGoToAttitude(matrix::Quatf &to_qo_quaternion, Vector3f angular_velocity, 
 	Matrix3f lyapunov_m = diag(Vector3f(1.6,1.6,1.6));
 	Matrix3f lyapunov_n = diag(Vector3f(0.15,0.15,0.15));
 	control_torques = inv(lyapunov_g)*(inv(diag(inertia))*(lyapunov_m*to_qo_quaternion.imag()-lyapunov_n*angular_velocity)-lyapunov_s);
-}
-
-void limitTilt(Vector3f &body_unit, const Vector3f &world_unit, const float max_angle)
-{
-	// determine tilt
-	const float dot_product_unit = body_unit.dot(world_unit);
-	float angle = acosf(dot_product_unit);
-	// limit tilt
-	angle = math::min(angle, max_angle);
-	Vector3f rejection = body_unit - (dot_product_unit * world_unit);
-
-	// corner case exactly parallel vectors
-	if (rejection.norm_squared() < FLT_EPSILON) {
-		rejection(0) = 1.f;
-	}
-
-	body_unit = cosf(angle) * world_unit + sinf(angle) * rejection.unit();
-}
-
-void bodyzToAttitude(Vector3f body_z, const float yaw_sp, vehicle_attitude_setpoint_s &att_sp)
-{
-	// zero vector, no direction, set safe level value
-	if (body_z.norm_squared() < FLT_EPSILON) {
-		body_z(2) = 1.f;
-	}
-
-	body_z.normalize();
-
-	// vector of desired yaw direction in XY plane, rotated by PI/2
-	const Vector3f y_C{-sinf(yaw_sp), cosf(yaw_sp), 0.f};
-
-	// desired body_x axis, orthogonal to body_z
-	Vector3f body_x = y_C % body_z;
-
-	// keep nose to front while inverted upside down
-	if (body_z(2) < 0.f) {
-		body_x = -body_x;
-	}
-
-	if (fabsf(body_z(2)) < 0.000001f) {
-		// desired thrust is in XY plane, set X downside to construct correct matrix,
-		// but yaw component will not be used actually
-		body_x.zero();
-		body_x(2) = 1.f;
-	}
-
-	body_x.normalize();
-
-	// desired body_y axis
-	const Vector3f body_y = body_z % body_x;
-
-	Dcmf R_sp;
-
-	// fill rotation matrix
-	for (int i = 0; i < 3; i++) {
-		R_sp(i, 0) = body_x(i);
-		R_sp(i, 1) = body_y(i);
-		R_sp(i, 2) = body_z(i);
-	}
-
-	// copy quaternion setpoint to attitude setpoint topic
-	const Quatf q_sp{R_sp};
-	q_sp.copyTo(att_sp.q_d);
-
-	// calculate euler angles, for logging only, must not be used for control
-	const Eulerf euler{R_sp};
-	att_sp.roll_body = euler.phi();
-	att_sp.pitch_body = euler.theta();
-	att_sp.yaw_body = euler.psi();
 }
 
 Vector2f constrainXY(const Vector2f &v0, const Vector2f &v1, const float &max)
@@ -195,54 +121,6 @@ Vector2f constrainXY(const Vector2f &v0, const Vector2f &v1, const float &max)
 	}
 }
 
-bool cross_sphere_line(const Vector3f &sphere_c, const float sphere_r,
-		       const Vector3f &line_a, const Vector3f &line_b, Vector3f &res)
-{
-	// project center of sphere on line  normalized AB
-	Vector3f ab_norm = line_b - line_a;
-
-	if (ab_norm.length() < 0.01f) {
-		return true;
-	}
-
-	ab_norm.normalize();
-	Vector3f d = line_a + ab_norm * ((sphere_c - line_a) * ab_norm);
-	float cd_len = (sphere_c - d).length();
-
-	if (sphere_r > cd_len) {
-		// we have triangle CDX with known CD and CX = R, find DX
-		float dx_len = sqrtf(sphere_r * sphere_r - cd_len * cd_len);
-
-		if ((sphere_c - line_b) * ab_norm > 0.f) {
-			// target waypoint is already behind us
-			res = line_b;
-
-		} else {
-			// target is in front of us
-			res = d + ab_norm * dx_len; // vector A->B on line
-		}
-
-		return true;
-
-	} else {
-
-		// have no roots, return D
-		res = d; // go directly to line
-
-		// previous waypoint is still in front of us
-		if ((sphere_c - line_a) * ab_norm < 0.f) {
-			res = line_a;
-		}
-
-		// target waypoint is already behind us
-		if ((sphere_c - line_b) * ab_norm > 0.f) {
-			res = line_b;
-		}
-
-		return false;
-	}
-}
-
 void addIfNotNan(float &setpoint, const float addition)
 {
 	if (PX4_ISFINITE(setpoint) && PX4_ISFINITE(addition)) {
@@ -270,4 +148,4 @@ void setZeroIfNanVector3f(Vector3f &vector)
 	addIfNotNanVector3f(vector, Vector3f());
 }
 
-} // ControlMath
+} // LqtControlMath

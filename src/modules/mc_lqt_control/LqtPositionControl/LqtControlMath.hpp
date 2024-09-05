@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file ControlMath.hpp
+ * @file LqtControlMath.hpp
  *
  * Simple functions for vector manipulation that do not fit into matrix lib.
  * These functions are specific for controls.
@@ -43,38 +43,14 @@
 #include <matrix/matrix/math.hpp>
 #include <uORB/topics/vehicle_attitude_setpoint.h>
 
-namespace ControlMath
+namespace LqtControlMath
 {
-/**
- * Converts thrust vector and yaw set-point to a desired attitude.
- * @param thr_sp desired 3D thrust vector
- * @param yaw_sp the desired yaw
- * @param att_sp attitude setpoint to fill
- */
-void thrustToAttitude(const matrix::Vector3f &thr_sp, const float yaw_sp, vehicle_attitude_setpoint_s &att_sp);
-
 /**
  * Creates attitude setpoint from to-go quaternion.
  * @param toGoQuaternion yaw incorporated to-go quaternion
  * @param att_sp attitude setpoint to fill
  */
 void toGoToAttitude(matrix::Quatf &to_qo_quaternion, matrix::Vector3f angular_velocity, matrix::Vector3f &control_torques);
-
-/**
- * Limits the tilt angle between two unit vectors
- * @param body_unit unit vector that will get adjusted if angle is too big
- * @param world_unit fixed vector to measure the angle against
- * @param max_angle maximum tilt angle between vectors in radians
- */
-void limitTilt(matrix::Vector3f &body_unit, const matrix::Vector3f &world_unit, const float max_angle);
-
-/**
- * Converts a body z vector and yaw set-point to a desired attitude.
- * @param body_z a world frame 3D vector in direction of the desired body z axis
- * @param yaw_sp the desired yaw setpoint
- * @param att_sp attitude setpoint to fill
- */
-void bodyzToAttitude(matrix::Vector3f body_z, const float yaw_sp, vehicle_attitude_setpoint_s &att_sp);
 
 /**
  * Outputs the sum of two vectors but respecting the limits and priority.
@@ -87,21 +63,6 @@ void bodyzToAttitude(matrix::Vector3f body_z, const float yaw_sp, vehicle_attitu
  * @return 2D vector
  */
 matrix::Vector2f constrainXY(const matrix::Vector2f &v0, const matrix::Vector2f &v1, const float &max);
-
-/**
- * This method was used for smoothing the corners along two lines.
- *
- * @param sphere_c
- * @param sphere_r
- * @param line_a
- * @param line_b
- * @param res
- * return boolean
- *
- * Note: this method is not used anywhere and first requires review before usage.
- */
-bool cross_sphere_line(const matrix::Vector3f &sphere_c, const float sphere_r, const matrix::Vector3f &line_a,
-		       const matrix::Vector3f &line_b, matrix::Vector3f &res);
 
 /**
  * Adds e.g. feed-forward to the setpoint making sure existing or added NANs have no influence on control.
