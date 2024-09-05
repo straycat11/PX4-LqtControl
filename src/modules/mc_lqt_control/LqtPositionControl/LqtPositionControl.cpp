@@ -62,9 +62,6 @@ void LqtPositionControl::_velocityControl()
 	Vector3f vel_sp_K_z = _gain_vel_K_z * _vel_sp;
 	Vector3f vel_sp_K_f = _gain_vel_K_f * Vector3f(0.f,0.f,CONSTANTS_ONE_G);
 	_acc_sp_lqt = vel_sp_K + vel_sp_K_z + vel_sp_K_f;
-	_vel_sp_K_debug = vel_sp_K;
-	_vel_sp_K_f_debug = vel_sp_K_f;
-	_vel_sp_K_z_debug = vel_sp_K_z;
 	_thr_sp_lqt =  math::constrain(-0.0370f*_acc_sp_lqt.norm(),-1.f,0.f);
 
 	_toGoAccelerationControl();
@@ -81,15 +78,11 @@ void LqtPositionControl::_toGoAccelerationControl()
 	float s_4 = sqrtf(0.5f * (1.f - acc_sp_body_normalized(2)));
 	Vector3f s_imag = (Vector3f(0.f, 0.f, -1.f).cross(acc_sp_body_normalized))/(2.f*s_4);
 	Quatf s = Quatf(s_4,s_imag(0),s_imag(1),s_imag(2));
-
-	_debug_s = s;
+	
 	float yaw_sp = PX4_ISFINITE(_yaw_sp) ? _yaw_sp : _yaw;
 	float delta_yaw = yaw_sp - Eulerf(_q).psi();
 	Vector3f y_imag = Vector3f(0.f,0.f,1.f*sinf(delta_yaw/2.f));
 	float y_4 = cosf(delta_yaw/2.f);
-	_debug_y = Quatf(y_4,y_imag(0),y_imag(1),y_imag(2));
-	_debug_acc_sp_body = acc_sp_body_normalized;
-	_debug_yaw = y_imag(1);
 
 	_toGoQuaternion = s * Quatf(y_4, y_imag(0),y_imag(1),y_imag(2));
 
@@ -136,19 +129,5 @@ void LqtPositionControl::getLocalPositionSetpointLqt(vehicle_local_position_setp
 	_acc_sp_lqt.copyTo(local_position_setpoint_lqt.acceleration);
 	_torque_sp_lqt.copyTo(local_position_setpoint_lqt.torque);
 	local_position_setpoint_lqt.heave = _thr_sp_lqt;
-	_debug_y.copyTo(local_position_setpoint_lqt.y_togo);
-	_debug_s.copyTo(local_position_setpoint_lqt.s_togo);
-	_vel_sp_K_debug.copyTo(local_position_setpoint_lqt.vel_sp_k);
-	_vel_sp_K_f_debug.copyTo(local_position_setpoint_lqt.vel_sp_k_f);
-	_vel_sp_K_z_debug.copyTo(local_position_setpoint_lqt.vel_sp_k_z);
 	_toGoQuaternion.copyTo(local_position_setpoint_lqt.togo);
-}
-
-void LqtPositionControl::getDebug(DebugVars &debug) const
-{
-	debug.s = _debug_s;
-	debug.y = _debug_y;
-	debug.acc_sp_body = _debug_acc_sp_body;
-	debug.yaw = _debug_yaw;
-	debug.toGo = _toGoQuaternion;
 }

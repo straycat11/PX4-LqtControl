@@ -19,10 +19,4 @@ float32 yawspeed	# in radians/sec
 
 float32 heave		# in normalized thrust
 
-float32[4] y_togo	# yaw component of to-go quaternion
-float32[4] s_togo	# yaw-free component of to-go quaternion
 float32[4] togo	# to-go quaternion
-
-float32[3] vel_sp_k	# K component of velocity setpoint (debug)
-float32[3] vel_sp_k_f	# K_f component of velocity setpoint (debug)
-float32[3] vel_sp_k_z	# K_z component of velocity setpoint (debug)
