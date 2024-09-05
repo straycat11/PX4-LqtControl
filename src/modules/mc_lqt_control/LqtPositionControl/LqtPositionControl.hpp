@@ -126,7 +126,6 @@ private:
 	// Setpoints
 	matrix::Vector3f _vel_sp; /**< desired velocity */
 	matrix::Vector3f _pos_sp; /**< desired position */
-	matrix::Vector3f _thr_sp; /**< desired thrust */
 	float _yaw_sp{}; /**< desired heading */
 	float _yawspeed_sp{}; /** desired yaw-speed */
 
