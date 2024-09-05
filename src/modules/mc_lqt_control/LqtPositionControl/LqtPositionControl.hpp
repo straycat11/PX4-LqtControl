@@ -15,7 +15,6 @@
 #include <uORB/topics/vehicle_attitude_setpoint.h>
 #include <uORB/topics/vehicle_local_position_setpoint.h>
 #include <uORB/topics/vehicle_local_position_setpoint_lqt.h>
-#include <uORB/topics/debug_array.h> // Debug
 
 struct PositionControlStates {
 	matrix::Vector3f position;
