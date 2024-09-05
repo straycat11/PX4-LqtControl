@@ -151,7 +151,7 @@ private:
 	control::BlockDerivative _vel_y_deriv; /**< velocity derivative in y */
 	control::BlockDerivative _vel_z_deriv; /**< velocity derivative in z */
 
-	LqtPositionControl _control; ///< class for core PID position control
+	LqtPositionControl _control; ///< class for core LQT position control
 
 	hrt_abstime _last_warn{0}; /**< timer when the last warn message was sent out */
 
