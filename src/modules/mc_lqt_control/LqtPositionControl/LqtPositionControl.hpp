@@ -66,12 +66,6 @@ public:
 	void setHorizontalThrustMargin(const float margin);
 
 	/**
-	 * Set the maximum tilt angle in radians the output attitude is allowed to have
-	 * @param tilt angle in radians from level orientation
-	 */
-	void setTiltLimit(const float tilt) { _lim_tilt = tilt; }
-
-	/**
 	 * Set the maximum velocity to execute with feed forward and position control
 	 * @param vel_horizontal horizontal velocity limit
 	 * @param vel_up upwards velocity limit

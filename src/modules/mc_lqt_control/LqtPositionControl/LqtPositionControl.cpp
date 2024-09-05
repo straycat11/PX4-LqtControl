@@ -13,13 +13,6 @@ void LqtPositionControl::setVelocityGains()
 	_gain_vel_K_z = diag(Vector3f(0.5*1.3379,0.5*1.3379,2*0.995));
 }
 
-void LqtPositionControl::setVelocityLimits(const float vel_horizontal, const float vel_up, const float vel_down)
-{
-	_lim_vel_horizontal = vel_horizontal;
-	_lim_vel_up = vel_up;
-	_lim_vel_down = vel_down;
-}
-
 void LqtPositionControl::setThrustLimits(const float min, const float max)
 {
 	// make sure there's always enough thrust vector length to infer the attitude
@@ -75,12 +68,6 @@ void LqtPositionControl::_positionControl()
 	LqtControlMath::addIfNotNanVector3f(_vel_sp, vel_sp_position);
 	// make sure there are no NAN elements for further reference while constraining
 	LqtControlMath::setZeroIfNanVector3f(vel_sp_position);
-
-	// Constrain horizontal velocity by prioritizing the velocity component along the
-	// the desired position setpoint over the feed-forward term.
-	_vel_sp.xy() = LqtControlMath::constrainXY(vel_sp_position.xy(), (_vel_sp - vel_sp_position).xy(), _lim_vel_horizontal);
-	// Constrain velocity in z-direction.
-	_vel_sp(2) = math::constrain(_vel_sp(2), -_lim_vel_up, _lim_vel_down);
 }
 
 void LqtPositionControl::_velocityControl()
