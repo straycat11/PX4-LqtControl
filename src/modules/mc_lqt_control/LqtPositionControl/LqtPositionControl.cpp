@@ -27,7 +27,6 @@ void LqtPositionControl::setInputSetpoint(const trajectory_setpoint_s &setpoint)
 {
 	_pos_sp = Vector3f(setpoint.position);
 	_vel_sp = Vector3f(setpoint.velocity);
-	_acc_sp = Vector3f(setpoint.acceleration);
 	_yaw_sp = setpoint.yaw;
 	_yawspeed_sp = setpoint.yawspeed;
 }
@@ -151,7 +150,6 @@ void LqtPositionControl::getDebug(DebugVars &debug) const
 	debug.s = _debug_s;
 	debug.y = _debug_y;
 	debug.acc_sp_body = _debug_acc_sp_body;
-	debug.acc_sp = _acc_sp;
 	debug.yaw = _debug_yaw;
 	debug.toGo = _toGoQuaternion;
 }

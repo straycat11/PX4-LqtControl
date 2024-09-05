@@ -128,7 +128,6 @@ private:
 	matrix::Vector3f _pos_sp; /**< desired position */
 	matrix::Vector3f _thr_sp; /**< desired thrust */
 	float _yaw_sp{}; /**< desired heading */
-	matrix::Vector3f _acc_sp; /**< desired acceleration */
 	float _yawspeed_sp{}; /** desired yaw-speed */
 
 	matrix::Quatf _toGoQuaternion;
