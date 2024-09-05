@@ -32,8 +32,8 @@
 ############################################################################
 
 px4_add_library(LqtPositionControl
-	ControlMath.cpp
-	ControlMath.hpp
+	LqtControlMath.cpp
+	LqtControlMath.hpp
 	LqtPositionControl.cpp
 	LqtPositionControl.hpp
 )
