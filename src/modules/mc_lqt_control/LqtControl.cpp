@@ -88,7 +88,7 @@ void LqtControl::parameters_update(bool force)
 			param_notify_changes();
 		}
 
-		_control.setPositionGains(Vector3f(_param_mpc_xy_p.get(), _param_mpc_xy_p.get(), _param_mpc_z_p.get()));
+		_control.setPositionGains(Vector3f(_param_mlc_xy_p.get(), _param_mlc_xy_p.get(), _param_mlc_z_p.get()));
 		_control.setVelocityGains();
 	}
 }

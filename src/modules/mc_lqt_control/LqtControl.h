@@ -143,8 +143,8 @@ private:
 
 	DEFINE_PARAMETERS(
 		// Position Control
-		(ParamFloat<px4::params::MLC_XY_P>)         _param_mpc_xy_p,
-		(ParamFloat<px4::params::MLC_Z_P>)          _param_mpc_z_p
+		(ParamFloat<px4::params::MLC_XY_P>)         _param_mlc_xy_p,
+		(ParamFloat<px4::params::MLC_Z_P>)          _param_mlc_z_p
 	);
 
 	control::BlockDerivative _vel_x_deriv; /**< velocity derivative in x */
