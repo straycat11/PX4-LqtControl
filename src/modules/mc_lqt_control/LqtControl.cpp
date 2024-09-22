@@ -43,10 +43,7 @@ using namespace matrix;
 
 LqtControl::LqtControl() :
 	SuperBlock(nullptr, "MLC"),ModuleParams(nullptr),
-	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::nav_and_controllers),
-	_vel_x_deriv(this, "VELD"),
-	_vel_y_deriv(this, "VELD"),
-	_vel_z_deriv(this, "VELD")
+	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::nav_and_controllers)
 {
 	parameters_update(true);
 }
@@ -118,28 +115,16 @@ PositionControlStates LqtControl::set_vehicle_states(const vehicle_local_positio
 
 	if (vehicle_local_position.v_xy_valid && velocity_xy.isAllFinite()) {
 		states.velocity.xy() = velocity_xy;
-		states.acceleration(0) = _vel_x_deriv.update(velocity_xy(0));
-		states.acceleration(1) = _vel_y_deriv.update(velocity_xy(1));
 
 	} else {
 		states.velocity(0) = states.velocity(1) = NAN;
-		states.acceleration(0) = states.acceleration(1) = NAN;
-
-		// reset derivatives to prevent acceleration spikes when regaining velocity
-		_vel_x_deriv.reset();
-		_vel_y_deriv.reset();
 	}
 
 	if (PX4_ISFINITE(vehicle_local_position.vz) && vehicle_local_position.v_z_valid) {
 		states.velocity(2) = vehicle_local_position.vz;
-		states.acceleration(2) = _vel_z_deriv.update(states.velocity(2));
 
 	} else {
 		states.velocity(2) = NAN;
-		states.acceleration(2) = NAN;
-
-		// reset derivative to prevent acceleration spikes when regaining velocity
-		_vel_z_deriv.reset();
 	}
 
 	states.yaw = vehicle_local_position.heading;
@@ -283,15 +268,6 @@ void LqtControl::adjustSetpointForEKFResets(const vehicle_local_position_s &vehi
 		if (vehicle_local_position.heading_reset_counter != _heading_reset_counter) {
 			setpoint.yaw = wrap_pi(setpoint.yaw + vehicle_local_position.delta_heading);
 		}
-	}
-
-	if (vehicle_local_position.vxy_reset_counter != _vxy_reset_counter) {
-		_vel_x_deriv.reset();
-		_vel_y_deriv.reset();
-	}
-
-	if (vehicle_local_position.vz_reset_counter != _vz_reset_counter) {
-		_vel_z_deriv.reset();
 	}
 
 	// save latest reset counters

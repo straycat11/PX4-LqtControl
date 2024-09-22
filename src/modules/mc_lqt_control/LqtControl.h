@@ -147,10 +147,6 @@ private:
 		(ParamFloat<px4::params::MLC_Z_P>)          _param_mlc_z_p
 	);
 
-	control::BlockDerivative _vel_x_deriv; /**< velocity derivative in x */
-	control::BlockDerivative _vel_y_deriv; /**< velocity derivative in y */
-	control::BlockDerivative _vel_z_deriv; /**< velocity derivative in z */
-
 	LqtPositionControl _control; ///< class for core LQT position control
 
 	hrt_abstime _last_warn{0}; /**< timer when the last warn message was sent out */

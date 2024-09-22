@@ -19,7 +19,6 @@
 struct PositionControlStates {
 	matrix::Vector3f position;
 	matrix::Vector3f velocity;
-	matrix::Vector3f acceleration;
 	float yaw;
 	matrix::Quatf q;
 	matrix::Vector3f angular_velocity;
