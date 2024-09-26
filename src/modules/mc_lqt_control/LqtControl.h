@@ -132,14 +132,6 @@ private:
 		.want_takeoff = false,
 	};
 
-	vehicle_land_detected_s _vehicle_land_detected {
-		.timestamp = 0,
-		.freefall = false,
-		.ground_contact = true,
-		.maybe_landed = true,
-		.landed = true,
-	};
-
 	DEFINE_PARAMETERS(
 		// Position Control
 		(ParamFloat<px4::params::MLC_XY_P>)         _param_mlc_xy_p,

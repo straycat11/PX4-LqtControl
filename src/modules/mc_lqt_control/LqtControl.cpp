@@ -166,8 +166,6 @@ void LqtControl::Run()
 				}
 			}
 		}
-
-		_vehicle_land_detected_sub.update(&_vehicle_land_detected);
 		_vehicle_attitude_sub.update(&vehicle_attitude);
 		_vehicle_angular_velocity_sub.update(&vehicle_angular_velocity);
 
