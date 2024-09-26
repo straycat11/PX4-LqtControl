@@ -58,6 +58,84 @@ PARAM_DEFINE_FLOAT(MLC_Z_P, 1.f);
 PARAM_DEFINE_FLOAT(MLC_XY_P, 0.95f);
 
 /**
+ * Proportional gain for vertical position error (lqt)
+ *
+ * Defined as corrective velocity in m/s per m position error
+ *
+ * @min 0.1
+ * @max 4.0
+ * @decimal 2
+ * @increment 0.1
+ * @group Multicopter Lqt Position Control
+ */
+PARAM_DEFINE_FLOAT(MLC_Z_K, 3.62f);
+
+/**
+ * Proportional gain for horizontal position error (lqt)
+ *
+ * Defined as corrective velocity in m/s per m position error
+ *
+ * @min 0
+ * @max 1
+ * @decimal 3
+ * @increment 0.01
+ * @group Multicopter Lqt Position Control
+ */
+PARAM_DEFINE_FLOAT(MLC_XY_K, 0.249f);
+
+/**
+ * Proportional gain for vertical position error (lqt)
+ *
+ * Defined as corrective velocity in m/s per m position error
+ *
+ * @min 0.1
+ * @max 2.0
+ * @decimal 2
+ * @increment 0.1
+ * @group Multicopter Lqt Position Control
+ */
+PARAM_DEFINE_FLOAT(MLC_Z_K_F, 1.35f);
+
+/**
+ * Proportional gain for horizontal position error (lqt)
+ *
+ * Defined as corrective velocity in m/s per m position error
+ *
+ * @min 0
+ * @max 2
+ * @decimal 2
+ * @increment 0.1
+ * @group Multicopter Lqt Position Control
+ */
+PARAM_DEFINE_FLOAT(MLC_XY_K_F, 1.39f);
+
+/**
+ * Proportional gain for vertical position error (lqt)
+ *
+ * Defined as corrective velocity in m/s per m position error
+ *
+ * @min 0.1
+ * @max 2.5
+ * @decimal 2
+ * @increment 0.1
+ * @group Multicopter Lqt Position Control
+ */
+PARAM_DEFINE_FLOAT(MLC_Z_K_Z, 1.99f);
+
+/**
+ * Proportional gain for horizontal position error (lqt)
+ *
+ * Defined as corrective velocity in m/s per m position error
+ *
+ * @min 0
+ * @max 2
+ * @decimal 3
+ * @increment 0.01
+ * @group Multicopter Lqt Position Control
+ */
+PARAM_DEFINE_FLOAT(MLC_XY_K_Z, 0.669f);
+
+/**
  * Numerical velocity derivative low pass cutoff frequency (lqt)
  *
  * @unit Hz

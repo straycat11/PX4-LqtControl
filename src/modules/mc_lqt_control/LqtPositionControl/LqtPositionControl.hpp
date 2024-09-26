@@ -49,7 +49,7 @@ public:
 	/**
 	 * Set the lqt velocity control gains
 	 */
-	void setVelocityGains();
+	void setVelocityGains(const matrix::Matrix3f &K,const matrix::Matrix3f &K_f,const matrix::Matrix3f &K_z) { _gain_vel_K = K; _gain_vel_K_f = K_f; _gain_vel_K_z = K_z; };
 
 	/**
 	 * Pass the current vehicle state to the controller

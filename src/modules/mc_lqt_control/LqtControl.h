@@ -128,7 +128,14 @@ private:
 	DEFINE_PARAMETERS(
 		// Position Control
 		(ParamFloat<px4::params::MLC_XY_P>)         _param_mlc_xy_p,
-		(ParamFloat<px4::params::MLC_Z_P>)          _param_mlc_z_p
+		(ParamFloat<px4::params::MLC_Z_P>)          _param_mlc_z_p,
+		// Lqt Gains
+		(ParamFloat<px4::params::MLC_XY_K>)         _param_mlc_xy_k,
+		(ParamFloat<px4::params::MLC_Z_K>)          _param_mlc_z_k,
+		(ParamFloat<px4::params::MLC_XY_K_F>)         _param_mlc_xy_k_f,
+		(ParamFloat<px4::params::MLC_Z_K_F>)          _param_mlc_z_k_f,
+		(ParamFloat<px4::params::MLC_XY_K_Z>)         _param_mlc_xy_k_z,
+		(ParamFloat<px4::params::MLC_Z_K_Z>)          _param_mlc_z_k_z
 	);
 
 	LqtPositionControl _control; ///< class for core LQT position control

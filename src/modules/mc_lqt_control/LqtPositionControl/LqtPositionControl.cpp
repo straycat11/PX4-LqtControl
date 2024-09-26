@@ -6,13 +6,6 @@ using namespace matrix;
 
 const trajectory_setpoint_s LqtPositionControl::empty_trajectory_setpoint = {0, {NAN, NAN, NAN}, {NAN, NAN, NAN}, {NAN, NAN, NAN}, {NAN, NAN, NAN}, NAN, NAN};
 
-void LqtPositionControl::setVelocityGains()
-{
-	_gain_vel_K = diag(Vector3f(0.2*-1.245,0.2*-1.245,4*-0.905));
-	_gain_vel_K_f = diag(Vector3f(-1.3885f,-1.3885f,-1.3507f));
-	_gain_vel_K_z = diag(Vector3f(0.5*1.3379,0.5*1.3379,2*0.995));
-}
-
 void LqtPositionControl::setState(const PositionControlStates &states)
 {
 	_pos = states.position;
