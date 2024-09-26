@@ -183,7 +183,7 @@ void LqtControl::Run()
 			if ((_setpoint.timestamp < _time_position_control_enabled)
 			    && (vehicle_local_position.timestamp_sample > _time_position_control_enabled)) {
 
-				_setpoint = generateFailsafeSetpoint(vehicle_local_position.timestamp_sample, states, false);
+				_setpoint = generateFailsafeSetpoint(vehicle_local_position.timestamp_sample, states);
 			}
 		}
 
@@ -202,7 +202,7 @@ void LqtControl::Run()
 				// Failsafe
 				_vehicle_constraints = {0, NAN, NAN, false, {}}; // reset constraints
 
-				_control.setInputSetpoint(generateFailsafeSetpoint(vehicle_local_position.timestamp_sample, states, true));
+				_control.setInputSetpoint(generateFailsafeSetpoint(vehicle_local_position.timestamp_sample, states));
 				_control.update();
 
 
@@ -225,11 +225,8 @@ void LqtControl::Run()
 }
 
 trajectory_setpoint_s LqtControl::generateFailsafeSetpoint(const hrt_abstime &now,
-		const PositionControlStates &states, bool warn)
+		const PositionControlStates &states)
 {
-	// rate limit the warnings
-	warn = warn && (now - _last_warn) > 2_s;
-
 	trajectory_setpoint_s failsafe_setpoint = LqtPositionControl::empty_trajectory_setpoint;
 	failsafe_setpoint.timestamp = now;
 

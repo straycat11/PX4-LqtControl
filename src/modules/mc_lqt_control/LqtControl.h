@@ -148,8 +148,6 @@ private:
 
 	LqtPositionControl _control; ///< class for core LQT position control
 
-	hrt_abstime _last_warn{0}; /**< timer when the last warn message was sent out */
-
 	/** Timeout in us for trajectory data to get considered invalid */
 	static constexpr uint64_t TRAJECTORY_STREAM_TIMEOUT_US = 500_ms;
 
@@ -163,7 +161,7 @@ private:
 	 * Used to handle transitions where no proper setpoint was generated yet and when the received setpoint is invalid.
 	 * This should only happen briefly when transitioning and never during mode operation or by design.
 	 */
-	trajectory_setpoint_s generateFailsafeSetpoint(const hrt_abstime &now, const PositionControlStates &states, bool warn);
+	trajectory_setpoint_s generateFailsafeSetpoint(const hrt_abstime &now, const PositionControlStates &states);
 
 	/**
 	 * @brief adjust existing (or older) setpoint with any EKF reset deltas and update the local counters
