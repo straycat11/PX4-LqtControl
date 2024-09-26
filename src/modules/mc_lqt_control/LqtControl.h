@@ -125,13 +125,6 @@ private:
 
 	vehicle_control_mode_s _vehicle_control_mode{};
 
-	vehicle_constraints_s _vehicle_constraints {
-		.timestamp = 0,
-		.speed_up = NAN,
-		.speed_down = NAN,
-		.want_takeoff = false,
-	};
-
 	DEFINE_PARAMETERS(
 		// Position Control
 		(ParamFloat<px4::params::MLC_XY_P>)         _param_mlc_xy_p,

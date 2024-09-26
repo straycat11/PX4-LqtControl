@@ -188,17 +188,12 @@ void LqtControl::Run()
 		if (_vehicle_control_mode.flag_multicopter_position_control_enabled
 		    && (_setpoint.timestamp >= _time_position_control_enabled)) {
 
-			// update vehicle constraints and handle smooth takeoff
-			_vehicle_constraints_sub.update(&_vehicle_constraints);
-
 			_control.setInputSetpoint(_setpoint);
 
 			_control.setState(states);
 
 			// Run position control
 			if (!_control.update()) {
-				// Failsafe
-				_vehicle_constraints = {0, NAN, NAN, false, {}}; // reset constraints
 
 				_control.setInputSetpoint(generateFailsafeSetpoint(vehicle_local_position.timestamp_sample, states));
 				_control.update();
