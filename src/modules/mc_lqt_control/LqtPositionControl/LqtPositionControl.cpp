@@ -40,6 +40,8 @@ bool LqtPositionControl::update()
 
 		_yawspeed_sp = PX4_ISFINITE(_yawspeed_sp) ? _yawspeed_sp : 0.f;
 		_yaw_sp = PX4_ISFINITE(_yaw_sp) ? _yaw_sp : _yaw; // TODO: better way to disable yaw control
+
+		_toGoAccelerationControl();
 	}
 
 	// There has to be a valid output acceleration and thrust setpoint otherwise something went wrong
@@ -63,15 +65,11 @@ void LqtPositionControl::_velocityControl()
 	Vector3f vel_sp_K_f = _gain_vel_K_f * Vector3f(0.f,0.f,CONSTANTS_ONE_G);
 	_acc_sp_lqt = vel_sp_K + vel_sp_K_z + vel_sp_K_f;
 	_thr_sp_lqt =  math::constrain(-0.0370f*_acc_sp_lqt.norm(),-1.f,0.f);
-
-	_toGoAccelerationControl();
 }
 
 
 void LqtPositionControl::_toGoAccelerationControl()
 {
-	// Assume standard acceleration due to gravity in vertical direction for attitude generation
-
 	Dcmf ned2body(_q.inversed());
 	_acc_sp_lqt(2) = math::constrain(_acc_sp_lqt(2),-1.f,0.f);
 	Vector3f acc_sp_body_normalized = ned2body * _acc_sp_lqt.normalized();
