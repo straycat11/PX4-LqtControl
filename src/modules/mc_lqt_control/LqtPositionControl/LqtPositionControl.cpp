@@ -30,7 +30,7 @@ void LqtPositionControl::setInputSetpoint(const trajectory_setpoint_s &setpoint)
 	_yawspeed_sp = setpoint.yawspeed;
 }
 
-bool LqtPositionControl::update(const float dt)
+bool LqtPositionControl::update()
 {
 	bool valid = _inputValid();
 
@@ -78,7 +78,7 @@ void LqtPositionControl::_toGoAccelerationControl()
 	float s_4 = sqrtf(0.5f * (1.f - acc_sp_body_normalized(2)));
 	Vector3f s_imag = (Vector3f(0.f, 0.f, -1.f).cross(acc_sp_body_normalized))/(2.f*s_4);
 	Quatf s = Quatf(s_4,s_imag(0),s_imag(1),s_imag(2));
-	
+
 	float yaw_sp = PX4_ISFINITE(_yaw_sp) ? _yaw_sp : _yaw;
 	float delta_yaw = yaw_sp - Eulerf(_q).psi();
 	Vector3f y_imag = Vector3f(0.f,0.f,1.f*sinf(delta_yaw/2.f));

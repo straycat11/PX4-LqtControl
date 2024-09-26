@@ -60,7 +60,6 @@ bool LqtControl::init()
 		return false;
 	}
 
-	_time_stamp_last_loop = hrt_absolute_time();
 	ScheduleNow();
 
 	return true;
@@ -153,12 +152,6 @@ void LqtControl::Run()
 	vehicle_angular_velocity_s vehicle_angular_velocity;
 
 	if (_local_pos_sub.update(&vehicle_local_position)) {
-		const float dt =
-			math::constrain(((vehicle_local_position.timestamp_sample - _time_stamp_last_loop) * 1e-6f), 0.002f, 0.04f);
-		_time_stamp_last_loop = vehicle_local_position.timestamp_sample;
-
-		// set _dt in controllib Block for BlockDerivative
-		setDt(dt);
 
 		if (_vehicle_control_mode_sub.updated()) {
 			const bool previous_position_control_enabled = _vehicle_control_mode.flag_multicopter_position_control_enabled;
@@ -205,12 +198,12 @@ void LqtControl::Run()
 			_control.setState(states);
 
 			// Run position control
-			if (!_control.update(dt)) {
+			if (!_control.update()) {
 				// Failsafe
 				_vehicle_constraints = {0, NAN, NAN, false, {}}; // reset constraints
 
 				_control.setInputSetpoint(generateFailsafeSetpoint(vehicle_local_position.timestamp_sample, states, true));
-				_control.update(dt);
+				_control.update();
 
 
 			}
