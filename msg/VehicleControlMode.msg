@@ -8,7 +8,6 @@ bool flag_control_auto_enabled			# true if onboard autopilot should act
 bool flag_control_offboard_enabled		# true if offboard control should be used
 bool flag_control_position_enabled		# true if position is controlled
 bool flag_control_velocity_enabled		# true if horizontal velocity (implies direction) is controlled
-bool flag_control_lqt_velocity_enabled		# true if horizontal velocity (implies direction) is controlled
 bool flag_control_altitude_enabled		# true if altitude is controlled
 bool flag_control_climb_rate_enabled		# true if climb rate is controlled
 bool flag_control_acceleration_enabled		# true if acceleration is controlled
