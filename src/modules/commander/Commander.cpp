@@ -2573,7 +2573,8 @@ void Commander::updateControlMode()
 		    || _vehicle_control_mode.flag_control_climb_rate_enabled
 		    || _vehicle_control_mode.flag_control_position_enabled
 		    || _vehicle_control_mode.flag_control_velocity_enabled
-		    || _vehicle_control_mode.flag_control_acceleration_enabled);
+		    || _vehicle_control_mode.flag_control_acceleration_enabled
+		    || _vehicle_control_mode.flag_control_lqt_to_go_enabled);
 	_vehicle_control_mode.timestamp = hrt_absolute_time();
 	_vehicle_control_mode_pub.publish(_vehicle_control_mode);
 }
