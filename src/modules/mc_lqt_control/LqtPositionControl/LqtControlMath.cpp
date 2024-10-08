@@ -44,17 +44,13 @@ using namespace matrix;
 
 namespace LqtControlMath
 {
-void toGoToAttitude(matrix::Quatf &to_qo_quaternion, Vector3f angular_velocity, Vector3f &control_torques)
+void toGoToAttitude(matrix::Quatf &to_qo_quaternion, Vector3f angular_velocity, Vector3f &control_torques, Matrix3f vehicle_inertia, Matrix3f lyapunov_m, Matrix3f lyapunov_n, float arm_length)
 {
-	Vector3f inertia =  Vector3f(0.029125f,0.029125f,0.055225f);
-	float arm_length = 0.0569f; // 0.13^2 + 0.2^2; from ../Tools/simulation/gazebo-classic/sitl_gazebo-classic/models/iris/iris.sdf.jinja
-	Vector3f lyapunov_s =  Vector3f((inertia(0)-inertia(2))*angular_velocity(1)*angular_velocity(2)/inertia(0),
-				(inertia(2)-inertia(0))*angular_velocity(0)*angular_velocity(2)/inertia(1),
-				(inertia(0)-inertia(1))*angular_velocity(0)*angular_velocity(1)/inertia(2));
-	Matrix3f lyapunov_g = diag(Vector3f(arm_length/inertia(0),arm_length/inertia(1),1.f/inertia(2)));
-	Matrix3f lyapunov_m = diag(Vector3f(1.6,1.6,1.6));
-	Matrix3f lyapunov_n = diag(Vector3f(0.15,0.15,0.15));
-	control_torques = inv(lyapunov_g)*(inv(diag(inertia))*(lyapunov_m*to_qo_quaternion.imag()-lyapunov_n*angular_velocity)-lyapunov_s);
+	Vector3f lyapunov_s =  Vector3f((vehicle_inertia(0,0)-vehicle_inertia(2,2))*angular_velocity(1)*angular_velocity(2)/vehicle_inertia(0,0),
+				(vehicle_inertia(2,2)-vehicle_inertia(0,0))*angular_velocity(0)*angular_velocity(2)/vehicle_inertia(1,1),
+				(vehicle_inertia(0,0)-vehicle_inertia(1,1))*angular_velocity(0)*angular_velocity(1)/vehicle_inertia(2,2));
+	Matrix3f lyapunov_g = diag(Vector3f(arm_length/vehicle_inertia(0,0),arm_length/vehicle_inertia(1,1),1.f/vehicle_inertia(2,2)));
+	control_torques = inv(lyapunov_g)*(inv(vehicle_inertia)*(lyapunov_m*to_qo_quaternion.imag()-lyapunov_n*angular_velocity)-lyapunov_s);
 }
 
 void addIfNotNan(float &setpoint, const float addition)

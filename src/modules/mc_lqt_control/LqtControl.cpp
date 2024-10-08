@@ -87,6 +87,11 @@ void LqtControl::parameters_update(bool force)
 		_control.setVelocityGains(diag(Vector3f(-_param_mlc_xy_k.get(), -_param_mlc_xy_k.get(), -_param_mlc_z_k.get())),
 		diag(Vector3f(-_param_mlc_xy_k_f.get(), -_param_mlc_xy_k_f.get(), -_param_mlc_z_k_f.get())),
 		diag(Vector3f(_param_mlc_xy_k_z.get(), _param_mlc_xy_k_z.get(), _param_mlc_z_k_z.get())));
+		_control.setLyapunovParams(
+			diag(Vector3f(_param_mlc_inertia_xx.get(),_param_mlc_inertia_yy.get(),			_param_mlc_inertia_zz.get())),
+			_param_mlc_arm_length.get(),
+			diag(Vector3f(_param_mlc_lyp_m_xy.get(),_param_mlc_lyp_m_xy.get(),_param_mlc_lyp_m_z.get())),
+			diag(Vector3f(_param_mlc_lyp_n_xy.get(),_param_mlc_lyp_n_xy.get(),_param_mlc_lyp_n_z.get())));
 	}
 }
 

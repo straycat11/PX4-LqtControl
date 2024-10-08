@@ -135,7 +135,15 @@ private:
 		(ParamFloat<px4::params::MLC_XY_K_F>)         _param_mlc_xy_k_f,
 		(ParamFloat<px4::params::MLC_Z_K_F>)          _param_mlc_z_k_f,
 		(ParamFloat<px4::params::MLC_XY_K_Z>)         _param_mlc_xy_k_z,
-		(ParamFloat<px4::params::MLC_Z_K_Z>)          _param_mlc_z_k_z
+		(ParamFloat<px4::params::MLC_Z_K_Z>)          _param_mlc_z_k_z,
+		(ParamFloat<px4::params::MLC_ARM_LENGTH>)         _param_mlc_arm_length,
+		(ParamFloat<px4::params::MLC_INERTIA_XX>)          _param_mlc_inertia_xx,
+		(ParamFloat<px4::params::MLC_INERTIA_YY>)          _param_mlc_inertia_yy,
+		(ParamFloat<px4::params::MLC_INERTIA_ZZ>)          _param_mlc_inertia_zz,
+		(ParamFloat<px4::params::MLC_LYP_M_XY>)         _param_mlc_lyp_m_xy,
+		(ParamFloat<px4::params::MLC_LYP_M_Z>)          _param_mlc_lyp_m_z,
+		(ParamFloat<px4::params::MLC_LYP_N_XY>)         _param_mlc_lyp_n_xy,
+		(ParamFloat<px4::params::MLC_LYP_N_Z>)          _param_mlc_lyp_n_z
 	);
 
 	LqtPositionControl _control; ///< class for core LQT position control

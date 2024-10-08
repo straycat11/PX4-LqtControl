@@ -146,3 +146,100 @@ PARAM_DEFINE_FLOAT(MLC_XY_K_Z, 0.669f);
  * @group Multicopter Lqt Position Control
  */
 PARAM_DEFINE_FLOAT(MLC_VELD_LP, 5.0f);
+
+/**
+ * Arm length of vehicle in meters
+ *
+ * @unit m
+ * @min 0
+ * @max 0.5
+ * @decimal 4
+ * @increment 0.0001
+ * @group Multicopter Lqt Position Control
+ */
+PARAM_DEFINE_FLOAT(MLC_ARM_LENGTH, 0.0569f);
+
+/**
+ * X component of vehicle moment of inertia.
+ *
+ * @min 0
+ * @max 0.1
+ * @decimal 6
+ * @increment 0.000005
+ * @group Multicopter Lqt Position Control
+ */
+PARAM_DEFINE_FLOAT(MLC_INERTIA_XX, 0.029125f);
+
+/**
+ * Y component of vehicle moment of inertia.
+ *
+ * @min 0
+ * @max 0.1
+ * @decimal 6
+ * @increment 0.000005
+ * @group Multicopter Lqt Position Control
+ */
+PARAM_DEFINE_FLOAT(MLC_INERTIA_YY, 0.029125f);
+
+/**
+ * Z component of vehicle moment of inertia.
+ *
+ * @min 0
+ * @max 0.1
+ * @decimal 6
+ * @increment 0.000005
+ * @group Multicopter Lqt Position Control
+ */
+PARAM_DEFINE_FLOAT(MLC_INERTIA_ZZ, 0.055225f);
+
+/**
+ * Lyapunov gain for first and second components of matrix M
+ *
+ *
+ *
+ * @min 0
+ * @max 2
+ * @decimal 2
+ * @increment 0.01
+ * @group Multicopter Lqt Position Control
+ */
+PARAM_DEFINE_FLOAT(MLC_LYP_M_XY, 1.6f);
+
+/**
+ * Lyapunov gain for third component of matrix M
+ *
+ *
+ *
+ * @min 0
+ * @max 2
+ * @decimal 2
+ * @increment 0.01
+ * @group Multicopter Lqt Position Control
+ */
+PARAM_DEFINE_FLOAT(MLC_LYP_M_Z, 1.6f);
+
+/**
+ * Lyapunov gain for first and second components of matrix N
+ *
+ *
+ *
+ * @min 0
+ * @max 2
+ * @decimal 2
+ * @increment 0.01
+ * @group Multicopter Lqt Position Control
+ */
+PARAM_DEFINE_FLOAT(MLC_LYP_N_XY, 0.15f);
+
+/**
+ * Lyapunov gain for third component of matrix N
+ *
+ *
+ *
+ * @min 0
+ * @max 2
+ * @decimal 2
+ * @increment 0.01
+ * @group Multicopter Lqt Position Control
+ */
+PARAM_DEFINE_FLOAT(MLC_LYP_N_Z, 0.15f);

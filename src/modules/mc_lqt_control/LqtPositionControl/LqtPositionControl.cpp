@@ -77,7 +77,7 @@ void LqtPositionControl::_toGoAccelerationControl()
 
 	_toGoQuaternion = s * Quatf(y_4, y_imag(0),y_imag(1),y_imag(2));
 
-	LqtControlMath::toGoToAttitude(_toGoQuaternion,_ang_vel,_torque_sp_lqt);
+	LqtControlMath::toGoToAttitude(_toGoQuaternion,_ang_vel,_torque_sp_lqt,_vehicle_inertia,_lyapunov_m,_lyapunov_n,_vehicle_arm_length);
 }
 
 bool LqtPositionControl::_inputValid()

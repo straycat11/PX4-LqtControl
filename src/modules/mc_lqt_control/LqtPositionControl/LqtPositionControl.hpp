@@ -52,6 +52,11 @@ public:
 	void setVelocityGains(const matrix::Matrix3f &K,const matrix::Matrix3f &K_f,const matrix::Matrix3f &K_z) { _gain_vel_K = K; _gain_vel_K_f = K_f; _gain_vel_K_z = K_z; };
 
 	/**
+	 * Set nonlinear control parameters
+	 */
+	void setLyapunovParams(const matrix::Matrix3f inertia, const float arm_length, const matrix::Matrix3f lyapunov_m, const matrix::Matrix3f lyapunov_n){ _vehicle_inertia = inertia; _lyapunov_m = lyapunov_m; _lyapunov_n = lyapunov_n; _vehicle_arm_length = arm_length;};
+
+	/**
 	 * Pass the current vehicle state to the controller
 	 * @param PositionControlStates structure
 	 */
@@ -127,6 +132,12 @@ private:
 	float _yawspeed_sp{}; /** desired yaw-speed */
 
 	matrix::Quatf _toGoQuaternion;
+
+	// Nonlinear control parameters
+	matrix::Matrix3f _vehicle_inertia;
+	matrix::Matrix3f _lyapunov_m;
+	matrix::Matrix3f _lyapunov_n;
+	float _vehicle_arm_length;
 
 	// Debug
 	matrix::Vector3f _acc_sp_lqt;

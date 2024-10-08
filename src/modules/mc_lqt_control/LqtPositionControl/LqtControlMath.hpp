@@ -50,7 +50,7 @@ namespace LqtControlMath
  * @param toGoQuaternion yaw incorporated to-go quaternion
  * @param att_sp attitude setpoint to fill
  */
-void toGoToAttitude(matrix::Quatf &to_qo_quaternion, matrix::Vector3f angular_velocity, matrix::Vector3f &control_torques);
+void toGoToAttitude(matrix::Quatf &to_qo_quaternion, matrix::Vector3f angular_velocity, matrix::Vector3f &control_torques, matrix::Matrix3f vehicle_inertia, matrix::Matrix3f lyapunov_m, matrix::Matrix3f lyapunov_n, float arm_length);
 
 /**
  * Adds e.g. feed-forward to the setpoint making sure existing or added NANs have no influence on control.
