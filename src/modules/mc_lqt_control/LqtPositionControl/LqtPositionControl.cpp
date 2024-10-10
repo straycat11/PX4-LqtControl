@@ -90,6 +90,9 @@ bool LqtPositionControl::_inputValid()
 		valid = valid && (PX4_ISFINITE(_pos_sp(i)) || PX4_ISFINITE(_vel_sp(i)));
 	}
 
+	// Yaw axis needs to have a setpoint
+	valid = valid && PX4_ISFINITE(_man_yaw);
+
 	// x and y input setpoints always have to come in pairs
 	valid = valid && (PX4_ISFINITE(_pos_sp(0)) == PX4_ISFINITE(_pos_sp(1)));
 	valid = valid && (PX4_ISFINITE(_vel_sp(0)) == PX4_ISFINITE(_vel_sp(1)));
@@ -103,6 +106,15 @@ bool LqtPositionControl::_inputValid()
 		if (PX4_ISFINITE(_vel_sp(i))) {
 			valid = valid && PX4_ISFINITE(_vel(i));
 		}
+
+		if (PX4_ISFINITE(_man_yaw)) {
+			valid = valid && PX4_ISFINITE(_yaw);
+		}
+	}
+
+	// Check quaternion validity
+	for(int i = 0; i <= 3; i++){
+		valid = valid && PX4_ISFINITE(_q(i));
 	}
 
 	return valid;
