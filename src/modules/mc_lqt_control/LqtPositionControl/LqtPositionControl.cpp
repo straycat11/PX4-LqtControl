@@ -15,12 +15,13 @@ void LqtPositionControl::setState(const PositionControlStates &states)
 	_ang_vel = states.angular_velocity;
 }
 
-void LqtPositionControl::setInputSetpoint(const trajectory_setpoint_s &setpoint)
+void LqtPositionControl::setInputSetpoint(const trajectory_setpoint_s &setpoint, float manualYaw)
 {
 	_pos_sp = Vector3f(setpoint.position);
 	_vel_sp = Vector3f(setpoint.velocity);
 	_yaw_sp = setpoint.yaw;
 	_yawspeed_sp = setpoint.yawspeed;
+	_man_yaw = manualYaw;
 }
 
 bool LqtPositionControl::update()
@@ -70,7 +71,7 @@ void LqtPositionControl::_toGoAccelerationControl()
 	Vector3f s_imag = (Vector3f(0.f, 0.f, -1.f).cross(acc_sp_body_normalized))/(2.f*s_4);
 	Quatf s = Quatf(s_4,s_imag(0),s_imag(1),s_imag(2));
 
-	float yaw_sp = PX4_ISFINITE(_yaw_sp) ? _yaw_sp : _yaw;
+	float yaw_sp = PX4_ISFINITE(_man_yaw) ? _man_yaw : _yaw;
 	float delta_yaw = yaw_sp - Eulerf(_q).psi();
 	Vector3f y_imag = Vector3f(0.f,0.f,1.f*sinf(delta_yaw/2.f));
 	float y_4 = cosf(delta_yaw/2.f);
@@ -112,7 +113,7 @@ void LqtPositionControl::getLocalPositionSetpointLqt(vehicle_local_position_setp
 	local_position_setpoint_lqt.x = _pos_sp(0);
 	local_position_setpoint_lqt.y = _pos_sp(1);
 	local_position_setpoint_lqt.z = _pos_sp(2);
-	local_position_setpoint_lqt.yaw = _yaw_sp;
+	local_position_setpoint_lqt.yaw = _man_yaw;
 	local_position_setpoint_lqt.yawspeed = _yawspeed_sp;
 	local_position_setpoint_lqt.vx = _vel_sp(0);
 	local_position_setpoint_lqt.vy = _vel_sp(1);

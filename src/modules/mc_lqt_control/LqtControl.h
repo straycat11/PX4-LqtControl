@@ -90,6 +90,7 @@ private:
 	 * @param force for a parameter update
 	 */
 
+	float _man_yaw;
 
 	uint8_t _vxy_reset_counter{0};
 	uint8_t _vz_reset_counter{0};
@@ -120,6 +121,7 @@ private:
 	uORB::Subscription _vehicle_angular_velocity_sub{ORB_ID(vehicle_angular_velocity)};
 
 	hrt_abstime _time_position_control_enabled{0};
+	hrt_abstime _last_run{0};
 
 	trajectory_setpoint_s _setpoint{LqtPositionControl::empty_trajectory_setpoint};
 

@@ -67,7 +67,7 @@ public:
 	 * Note: NAN value means no feed forward/leave state uncontrolled if there's no higher order setpoint.
 	 * @param setpoint setpoints including feed-forwards to execute in update()
 	 */
-	void setInputSetpoint(const trajectory_setpoint_s &setpoint);
+	void setInputSetpoint(const trajectory_setpoint_s &setpoint,float manualYaw);
 
 	/**
 	 * Apply P-position and PID-velocity controller that updates the member
@@ -130,6 +130,7 @@ private:
 	matrix::Vector3f _pos_sp; /**< desired position */
 	float _yaw_sp{}; /**< desired heading */
 	float _yawspeed_sp{}; /** desired yaw-speed */
+	float _man_yaw;
 
 	matrix::Quatf _toGoQuaternion;
 
