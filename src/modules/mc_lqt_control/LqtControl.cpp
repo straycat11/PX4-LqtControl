@@ -192,11 +192,17 @@ void LqtControl::Run()
 			}
 		}
 
-		const float dt = math::constrain(((vehicle_local_position.timestamp_sample - _last_run) * 1e-6f), 0.0002f, 0.02f);
+		//const float dt = math::constrain(((vehicle_local_position.timestamp_sample - _last_run) * 1e-6f), 0.0002f, 0.02f);
 		_last_run = vehicle_local_position.timestamp_sample;
-		float addition = _setpoint.yawspeed * dt;
+		float addition = math::constrain(_setpoint.yawspeed,-1.0f,1.0f);
+		if(false == PX4_ISFINITE(addition)){
+			_man_yaw = matrix::Eulerf(matrix::Quatf(vehicle_attitude.q)).psi();
+		}
+		else{
+			_man_yaw = matrix::Eulerf(matrix::Quatf(vehicle_attitude.q)).psi() + addition;
+		}
 
-		_man_yaw = PX4_ISFINITE(addition) ? wrap_pi(_man_yaw + _setpoint.yawspeed * dt):_man_yaw;
+
 
 		if (_vehicle_control_mode.flag_multicopter_position_control_enabled
 		    && (_setpoint.timestamp >= _time_position_control_enabled)) {
