@@ -49,7 +49,7 @@ public:
 	/**
 	 * Set the lqt velocity control gains
 	 */
-	void setVelocityGains(const matrix::Matrix3f &K,const matrix::Matrix3f &K_f,const matrix::Matrix3f &K_z) { _gain_vel_K = K; _gain_vel_K_f = K_f; _gain_vel_K_z = K_z; };
+	void setVelocityGains(const matrix::Matrix3f &K,const matrix::Matrix3f &K_f,const matrix::Matrix3f &K_z, const float &heaveGain) { _gain_vel_K = K; _gain_vel_K_f = K_f; _gain_vel_K_z = K_z; _gain_heave = heaveGain;};
 
 	/**
 	 * Set nonlinear control parameters
@@ -117,6 +117,7 @@ private:
 	matrix::Matrix3f _gain_vel_K; ///< Velocity lqt control K
 	matrix::Matrix3f _gain_vel_K_z; ///< Velocity lqt control K_z
 	matrix::Matrix3f _gain_vel_K_f; ///< Velocity lqt control K_f
+	float _gain_heave; ///< Velocity lqt control heave
 
 	// States
 	matrix::Vector3f _pos; /**< current position */

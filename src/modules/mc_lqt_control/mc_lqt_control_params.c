@@ -243,3 +243,16 @@ PARAM_DEFINE_FLOAT(MLC_LYP_N_XY, 0.15f);
  * @group Multicopter Lqt Position Control
  */
 PARAM_DEFINE_FLOAT(MLC_LYP_N_Z, 0.15f);
+
+/**
+ * Heave setpoint multiplier
+ *
+ * Sets hover thrust
+ *
+ * @min 0.1
+ * @max 2
+ * @decimal 2
+ * @increment 0.01
+ * @group Multicopter Lqt Position Control
+ */
+PARAM_DEFINE_FLOAT(MLC_HEAVE, 1.25f);
