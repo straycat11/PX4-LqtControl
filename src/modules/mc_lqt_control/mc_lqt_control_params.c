@@ -37,12 +37,12 @@
  * Defined as corrective velocity in m/s per m position error
  *
  * @min 0.1
- * @max 1.5
- * @decimal 2
- * @increment 0.1
+ * @max 100
+ * @decimal 1
+ * @increment 1
  * @group Multicopter Lqt Position Control
  */
-PARAM_DEFINE_FLOAT(MLC_Z_P, 1.f);
+PARAM_DEFINE_FLOAT(MLC_Z_P, 15.f);
 
 /**
  * Proportional gain for horizontal position error (lqt)
@@ -50,12 +50,12 @@ PARAM_DEFINE_FLOAT(MLC_Z_P, 1.f);
  * Defined as corrective velocity in m/s per m position error
  *
  * @min 0
- * @max 2
- * @decimal 2
- * @increment 0.1
+ * @max 100
+ * @decimal 1
+ * @increment 1
  * @group Multicopter Lqt Position Control
  */
-PARAM_DEFINE_FLOAT(MLC_XY_P, 0.95f);
+PARAM_DEFINE_FLOAT(MLC_XY_P, 15.f);
 
 /**
  * Proportional gain for vertical position error (lqt)
@@ -63,12 +63,12 @@ PARAM_DEFINE_FLOAT(MLC_XY_P, 0.95f);
  * Defined as corrective velocity in m/s per m position error
  *
  * @min 0.1
- * @max 4.0
+ * @max 50.0
  * @decimal 2
  * @increment 0.1
  * @group Multicopter Lqt Position Control
  */
-PARAM_DEFINE_FLOAT(MLC_Z_K, 3.62f);
+PARAM_DEFINE_FLOAT(MLC_Z_K, 15.00f);
 
 /**
  * Proportional gain for horizontal position error (lqt)
@@ -81,7 +81,7 @@ PARAM_DEFINE_FLOAT(MLC_Z_K, 3.62f);
  * @increment 0.01
  * @group Multicopter Lqt Position Control
  */
-PARAM_DEFINE_FLOAT(MLC_XY_K, 0.249f);
+PARAM_DEFINE_FLOAT(MLC_XY_K, 0.500f);
 
 /**
  * Proportional gain for vertical position error (lqt)
@@ -107,7 +107,7 @@ PARAM_DEFINE_FLOAT(MLC_Z_K_F, 1.35f);
  * @increment 0.1
  * @group Multicopter Lqt Position Control
  */
-PARAM_DEFINE_FLOAT(MLC_XY_K_F, 1.39f);
+PARAM_DEFINE_FLOAT(MLC_XY_K_F, 0.04f);
 
 /**
  * Proportional gain for vertical position error (lqt)
@@ -115,12 +115,12 @@ PARAM_DEFINE_FLOAT(MLC_XY_K_F, 1.39f);
  * Defined as corrective velocity in m/s per m position error
  *
  * @min 0.1
- * @max 2.5
- * @decimal 2
+ * @max 15.0
+ * @decimal 1
  * @increment 0.1
  * @group Multicopter Lqt Position Control
  */
-PARAM_DEFINE_FLOAT(MLC_Z_K_Z, 1.99f);
+PARAM_DEFINE_FLOAT(MLC_Z_K_Z, 5.00f);
 
 /**
  * Proportional gain for horizontal position error (lqt)
@@ -133,7 +133,7 @@ PARAM_DEFINE_FLOAT(MLC_Z_K_Z, 1.99f);
  * @increment 0.01
  * @group Multicopter Lqt Position Control
  */
-PARAM_DEFINE_FLOAT(MLC_XY_K_Z, 0.669f);
+PARAM_DEFINE_FLOAT(MLC_XY_K_Z, 0.060f);
 
 /**
  * Numerical velocity derivative low pass cutoff frequency (lqt)
@@ -198,12 +198,12 @@ PARAM_DEFINE_FLOAT(MLC_INERTIA_ZZ, 0.055225f);
  *
  *
  * @min 0
- * @max 2
- * @decimal 2
- * @increment 0.01
+ * @max 10
+ * @decimal 1
+ * @increment 0.1
  * @group Multicopter Lqt Position Control
  */
-PARAM_DEFINE_FLOAT(MLC_LYP_M_XY, 1.6f);
+PARAM_DEFINE_FLOAT(MLC_LYP_M_XY, 0.9f);
 
 /**
  * Lyapunov gain for third component of matrix M
@@ -211,12 +211,12 @@ PARAM_DEFINE_FLOAT(MLC_LYP_M_XY, 1.6f);
  *
  *
  * @min 0
- * @max 2
+ * @max 3
  * @decimal 2
  * @increment 0.01
  * @group Multicopter Lqt Position Control
  */
-PARAM_DEFINE_FLOAT(MLC_LYP_M_Z, 1.6f);
+PARAM_DEFINE_FLOAT(MLC_LYP_M_Z, 1.9f);
 
 /**
  * Lyapunov gain for first and second components of matrix N
@@ -224,12 +224,12 @@ PARAM_DEFINE_FLOAT(MLC_LYP_M_Z, 1.6f);
  *
  *
  * @min 0
- * @max 2
- * @decimal 2
- * @increment 0.01
+ * @max 0.15
+ * @decimal 3
+ * @increment 0.001
  * @group Multicopter Lqt Position Control
  */
-PARAM_DEFINE_FLOAT(MLC_LYP_N_XY, 0.15f);
+PARAM_DEFINE_FLOAT(MLC_LYP_N_XY, 0.01f);
 
 /**
  * Lyapunov gain for third component of matrix N
@@ -242,7 +242,7 @@ PARAM_DEFINE_FLOAT(MLC_LYP_N_XY, 0.15f);
  * @increment 0.01
  * @group Multicopter Lqt Position Control
  */
-PARAM_DEFINE_FLOAT(MLC_LYP_N_Z, 0.15f);
+PARAM_DEFINE_FLOAT(MLC_LYP_N_Z, 2.00f);
 
 /**
  * Heave setpoint multiplier
