@@ -59,6 +59,7 @@
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/vehicle_thrust_setpoint.h>
 #include <uORB/topics/vehicle_torque_setpoint.h>
+#include <uORB/topics/vehicle_local_position_setpoint_lqt.h>
 
 using namespace time_literals;
 
@@ -98,6 +99,7 @@ private:
 	uORB::Subscription _vehicle_land_detected_sub{ORB_ID(vehicle_land_detected)};
 	uORB::Subscription _vehicle_rates_setpoint_sub{ORB_ID(vehicle_rates_setpoint)};
 	uORB::Subscription _vehicle_status_sub{ORB_ID(vehicle_status)};
+	uORB::Subscription _vehicle_local_position_lqt_sub{ORB_ID(vehicle_local_position_setpoint_lqt)};
 
 	uORB::SubscriptionInterval _parameter_update_sub{ORB_ID(parameter_update), 1_s};
 
@@ -116,6 +118,7 @@ private:
 	bool _maybe_landed{true};
 
 	hrt_abstime _last_run{0};
+	hrt_abstime _last_position_lqt_setpoint{0};
 
 	perf_counter_t	_loop_perf;			/**< loop duration performance counter */
 
@@ -125,6 +128,9 @@ private:
 
 	float _battery_status_scale{0.0f};
 	matrix::Vector3f _thrust_setpoint{};
+
+	float _thrust_setpoint_body_lqt; /**< body frame 3D thrust vector */
+	matrix::Vector3f _torque_setpoint_body_lqt; /**< body frame 3D torque vector */
 
 	float _energy_integration_time{0.0f};
 	float _control_energy[4] {};
