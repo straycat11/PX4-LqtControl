@@ -269,8 +269,6 @@ MulticopterAttitudeControl::Run()
 
 		const bool run_att_ctrl = _vehicle_control_mode.flag_control_attitude_enabled && (is_hovering
 					  || is_tailsitter_transition);
-		const bool run_togo_att_ctrl = _vehicle_control_mode.flag_control_lqt_to_go_enabled && (is_hovering
-					  || is_tailsitter_transition);
 
 		if (run_att_ctrl) {
 
@@ -337,35 +335,6 @@ MulticopterAttitudeControl::Run()
 			rates_setpoint.pitch = rates_sp(1);
 			rates_setpoint.yaw = rates_sp(2);
 			_thrust_setpoint_body.copyTo(rates_setpoint.thrust_body);
-			rates_setpoint.timestamp = hrt_absolute_time();
-
-			_vehicle_rates_setpoint_pub.publish(rates_setpoint);
-		}
-		if (run_togo_att_ctrl) {
-
-			// Check for new attitude setpoint
-			if (_vehicle_local_position_lqt_sub.updated()) {
-				vehicle_local_position_setpoint_lqt_s vehicle_local_position_setpoint_lqt;
-
-				if (_vehicle_local_position_lqt_sub.copy(&vehicle_local_position_setpoint_lqt)
-				    && (vehicle_local_position_setpoint_lqt.timestamp > _last_position_lqt_setpoint)) {
-
-					_thrust_setpoint_body_lqt = vehicle_local_position_setpoint_lqt.heave;
-					_torque_setpoint_body_lqt = Vector3f(vehicle_local_position_setpoint_lqt.torque);
-					_last_position_lqt_setpoint = vehicle_local_position_setpoint_lqt.timestamp;
-				}
-			}
-
-			Vector3f rates_sp = _torque_setpoint_body_lqt;
-			// publish rate setpoint
-			vehicle_rates_setpoint_s rates_setpoint{};
-			rates_setpoint.roll = rates_sp(0);
-			rates_setpoint.pitch = rates_sp(1);
-			rates_setpoint.yaw = rates_sp(2);
-
-			rates_setpoint.thrust_body[0] = 0.f;
-			rates_setpoint.thrust_body[1] = 0.f;
-			rates_setpoint.thrust_body[2] = _thrust_setpoint_body_lqt;
 			rates_setpoint.timestamp = hrt_absolute_time();
 
 			_vehicle_rates_setpoint_pub.publish(rates_setpoint);
