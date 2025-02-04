@@ -199,11 +199,11 @@ PARAM_DEFINE_FLOAT(MLC_INERTIA_ZZ, 0.055225f);
  *
  * @min 0
  * @max 10
- * @decimal 1
- * @increment 0.1
+ * @decimal 2
+ * @increment 0.01
  * @group Multicopter Lqt Position Control
  */
-PARAM_DEFINE_FLOAT(MLC_LYP_M_XY, 0.9f);
+PARAM_DEFINE_FLOAT(MLC_LYP_M_XY, 0.1f);
 
 /**
  * Lyapunov gain for third component of matrix M
@@ -216,7 +216,7 @@ PARAM_DEFINE_FLOAT(MLC_LYP_M_XY, 0.9f);
  * @increment 0.01
  * @group Multicopter Lqt Position Control
  */
-PARAM_DEFINE_FLOAT(MLC_LYP_M_Z, 1.9f);
+PARAM_DEFINE_FLOAT(MLC_LYP_M_Z, 0.19f);
 
 /**
  * Lyapunov gain for first and second components of matrix N
@@ -242,7 +242,7 @@ PARAM_DEFINE_FLOAT(MLC_LYP_N_XY, 0.01f);
  * @increment 0.01
  * @group Multicopter Lqt Position Control
  */
-PARAM_DEFINE_FLOAT(MLC_LYP_N_Z, 2.00f);
+PARAM_DEFINE_FLOAT(MLC_LYP_N_Z, 1.00f);
 
 /**
  * Heave setpoint multiplier

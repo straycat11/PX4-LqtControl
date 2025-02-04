@@ -261,6 +261,46 @@ MulticopterRateControl::Run()
 			updateActuatorControlsStatus(vehicle_torque_setpoint, dt);
 
 		}
+
+		// run the rate controller
+		if (_vehicle_control_mode.flag_control_qnclqt_torque_control_enabled) {
+
+			// Check for new torque and thrust setpoint
+			if (_vehicle_local_position_lqt_sub.updated()) {
+				vehicle_local_position_setpoint_lqt_s vehicle_local_position_setpoint_lqt;
+
+				if (_vehicle_local_position_lqt_sub.copy(&vehicle_local_position_setpoint_lqt)
+				    && (vehicle_local_position_setpoint_lqt.timestamp > _last_position_lqt_setpoint)) {
+
+					_thrust_setpoint_body_lqt = vehicle_local_position_setpoint_lqt.heave;
+					_torque_setpoint_body_lqt = Vector3f(vehicle_local_position_setpoint_lqt.torque);
+					_last_position_lqt_setpoint = vehicle_local_position_setpoint_lqt.timestamp;
+				}
+			}
+
+			Vector3f torque_sp = _torque_setpoint_body_lqt;
+			Vector3f thrust_sp = Vector3f(0.f,0.f,_thrust_setpoint_body_lqt);
+
+			// publish thrust and torque setpoints
+			vehicle_thrust_setpoint_s vehicle_thrust_setpoint{};
+			vehicle_torque_setpoint_s vehicle_torque_setpoint{};
+
+			thrust_sp.copyTo(vehicle_thrust_setpoint.xyz);
+			vehicle_torque_setpoint.xyz[0] = PX4_ISFINITE(torque_sp(0)) ? torque_sp(0) : 0.f;
+			vehicle_torque_setpoint.xyz[1] = PX4_ISFINITE(torque_sp(1)) ? torque_sp(1) : 0.f;
+			vehicle_torque_setpoint.xyz[2] = PX4_ISFINITE(torque_sp(2)) ? torque_sp(2) : 0.f;
+
+			vehicle_thrust_setpoint.timestamp_sample = angular_velocity.timestamp_sample;
+			vehicle_thrust_setpoint.timestamp = hrt_absolute_time();
+			_vehicle_thrust_setpoint_pub.publish(vehicle_thrust_setpoint);
+
+			vehicle_torque_setpoint.timestamp_sample = angular_velocity.timestamp_sample;
+			vehicle_torque_setpoint.timestamp = hrt_absolute_time();
+			_vehicle_torque_setpoint_pub.publish(vehicle_torque_setpoint);
+
+			updateActuatorControlsStatus(vehicle_torque_setpoint, dt);
+
+		}
 	}
 
 	perf_end(_loop_perf);
